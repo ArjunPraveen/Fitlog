@@ -67,7 +67,7 @@ export default async function DashboardPage() {
               <p className="font-semibold text-sm text-emerald-300">Workout in progress</p>
               <p className="text-xs text-emerald-400/70 mt-0.5">{activeWorkout.name ?? 'Untitled workout'}</p>
             </div>
-            <Button size="sm" render={<Link href={`/workout/${activeWorkout.id}`} />}>
+            <Button size="sm" nativeButton={false} render={<Link href={`/workout/${activeWorkout.id}`} />}>
               Resume
             </Button>
           </div>

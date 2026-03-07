@@ -33,16 +33,20 @@ export function WorkoutStopwatch({ startedAt, onAutoFinish }: { startedAt: strin
   const warning = elapsed > MAX_MS * 0.8
 
   return (
-    <div className={`flex items-center gap-2 rounded-xl px-3 py-2 border ${
-      warning
-        ? 'bg-amber-500/10 border-amber-500/25'
-        : 'bg-white/5 border-white/8'
+    <div className={`flex flex-col items-center justify-center rounded-2xl border py-8 gap-2 ${
+      warning ? 'bg-amber-500/8 border-amber-500/25' : 'bg-white/3 border-white/8'
     }`}>
-      <Timer className={`h-4 w-4 shrink-0 ${warning ? 'text-amber-400' : 'text-primary'}`} />
-      <span className={`font-mono text-sm font-semibold tabular-nums ${warning ? 'text-amber-400' : 'text-foreground'}`}>
+      <div className="flex items-center gap-2">
+        <Timer className={`h-5 w-5 ${warning ? 'text-amber-400' : 'text-muted-foreground'}`} />
+        <span className="text-xs tracking-widest uppercase text-muted-foreground">
+          {warning ? 'Ending soon' : 'Workout time'}
+        </span>
+      </div>
+      <span className={`font-mono text-6xl font-bold tabular-nums tracking-tight ${
+        warning ? 'text-amber-400' : 'text-foreground'
+      }`}>
         {fmt(elapsed)}
       </span>
-      {warning && <span className="text-[11px] text-amber-400/70">ending soon</span>}
     </div>
   )
 }
