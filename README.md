@@ -4,6 +4,57 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 ---
 
+<details>
+<summary><strong>Iterations</strong></summary>
+
+### Iteration 1 — Initial scaffold
+Set up the full Next.js + Supabase monolith from scratch. Established the system design (HLD + LLD), DB schema with RLS, hardcoded exercise library (28 exercises across 6 muscle groups), rule-based muscle recovery engine, progressive overload hints, and Strava-style social follow system. Deployed to GitHub.
+
+### Iteration 2 — UI redesign: Elegant Luxury theme
+Replaced the plain default UI with a dark luxury theme. Changes included:
+- Near-black background, muted warm gold accent (`oklch(0.72 0.09 72)`), cream foreground
+- Switched from sidebar nav to a floating bottom navigation bar with 4 icons
+- Added Framer Motion page transitions (fade + slide up), card stagger animations, animated recovery bars, shared `layoutId` pill indicator in the bottom nav
+- Switched font to Figtree (via `next/font/google`)
+- Fixed CSS variable scoping issue — `--font-sans` must be applied on `body`, not `html`, in Next.js App Router
+
+### Iteration 3 — Font tweaks
+- Tried Space Grotesk → switched to Figtree per preference
+- Toned down the gold accent colour to a more muted warm tone
+
+### Iteration 4 — Layout fixes
+- Fixed unequal card heights on the three workout-entry cards (Suggested / Template / From Scratch) — added `h-full` and `items-stretch`
+- Fixed sticky CTA button on the new workout page appearing behind the bottom nav — changed `bottom-4` to `bottom-[5.5rem]`
+
+### Iteration 5 — Documentation + GitHub push
+- Wrote full `README.md` covering stack, design decisions, project structure, DB schema, setup steps, and pending checklist
+- Authenticated with correct GitHub account (ArjunPraveen) via `gh auth login --web`
+- Pushed all changes to `ArjunPraveen/Fitlog`
+
+### Iteration 6 — Supabase connection
+- Ran `supabase-schema.sql` in the Supabase SQL Editor (8 tables + RLS policies + signup trigger)
+- Added `.env.local` with real project URL and anon key
+- Restored all preview stubs back to real Supabase queries: middleware auth, app layout auth guard, dashboard, history, and progress pages
+- Renamed `middleware.ts` → `proxy.ts` to comply with Next.js 16 convention (function export also renamed to `proxy`)
+
+### Iteration 7 — Save workout as template
+- Added "Save template" button on completed workout pages
+- Inline name input (pre-filled with workout name) with confirm/cancel
+- Saves exercise list to `workout_templates` table
+- Button transitions to a "Saved!" checkmark state to prevent double-saves
+
+### Iteration 8 — Live stopwatch, history by day, templates from history, dashboard workouts
+- **Live stopwatch** on active workout page: counts up from `started_at`, turns amber at 80% of max duration, auto-finishes and navigates to history at 2.5 hours
+- **History grouped by day**: Today / Yesterday / weekday + date headers; in-progress workouts surfaced at top in green
+- **Save as template from history**: each completed workout card in history has an inline save-as-template button (fetches exercise IDs from sets on demand)
+- **Recent workouts on dashboard**: last 3 completed workouts shown below the start-workout cards, with a "See all" link to history
+- **Template picker improved**: cards show loaded state, empty state message when no templates saved yet
+- **DB migration required**: `workout_templates.exercise_ids` changed from `UUID[]` to `TEXT[]` to match hardcoded exercise slug IDs
+
+</details>
+
+---
+
 ## Stack
 
 | Layer | Choice | Why |
@@ -170,9 +221,10 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Pending (before going live)
 
-- [ ] Restore auth middleware (`middleware.ts`) after connecting Supabase
-- [ ] Restore server-side auth in `app/(app)/layout.tsx` and `dashboard/page.tsx`
-- [ ] Restore real Supabase queries in `history/page.tsx` and `progress/page.tsx` (currently using stub data for preview)
+- [x] Auth proxy (`proxy.ts`) connected to Supabase
+- [x] Real Supabase queries restored across all pages
+- [ ] Run DB migration: `ALTER TABLE public.workout_templates ALTER COLUMN exercise_ids TYPE TEXT[] USING exercise_ids::TEXT[];`
 - [ ] Seed exercise images into Supabase Storage or `public/exercises/`
 - [ ] Test social follow flow end-to-end with two accounts
 - [ ] Initialize `privacy_settings` and `user_preferences` rows on signup (via Supabase trigger or API)
+- [ ] Deploy to Vercel with env vars
