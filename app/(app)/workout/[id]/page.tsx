@@ -1,17 +1,15 @@
 'use client'
 
-import { useEffect, useState, use } from 'react'
+import { useEffect, useState, use, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { getExerciseById, EXERCISES } from '@/lib/exercises'
 import { computeProgressiveOverload } from '@/lib/progressive-overload'
 import { SetLogger } from '@/components/SetLogger'
+import { WorkoutStopwatch } from '@/components/WorkoutStopwatch'
 import type { LoggedSet } from '@/components/SetLogger'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { CheckCircle, ExternalLink } from 'lucide-react'
+import { CheckCircle, ExternalLink, BookmarkPlus, Check } from 'lucide-react'
 import type { WorkoutSet } from '@/types'
 
 interface ExerciseSession {
@@ -25,10 +23,14 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const router = useRouter()
 
   const [exerciseSessions, setExerciseSessions] = useState<ExerciseSession[]>([])
-  const [workout, setWorkout] = useState<{ name: string | null; finished_at: string | null } | null>(null)
+  const [workout, setWorkout] = useState<{ name: string | null; finished_at: string | null; started_at: string } | null>(null)
   const [overloadHints, setOverloadHints] = useState<Record<string, string>>({})
   const [finishing, setFinishing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [savingTemplate, setSavingTemplate] = useState(false)
+  const [templateName, setTemplateName] = useState('')
+  const [showTemplateSave, setShowTemplateSave] = useState(false)
+  const [templateSaved, setTemplateSaved] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -36,22 +38,20 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      // Load workout metadata
       const { data: w } = await supabase
         .from('workouts')
-        .select('name, finished_at')
+        .select('name, finished_at, started_at')
         .eq('id', workoutId)
         .single()
       setWorkout(w)
+      setTemplateName(w?.name ?? '')
 
-      // Load existing sets for this workout
       const { data: existingSets } = await supabase
         .from('workout_sets')
         .select('*')
         .eq('workout_id', workoutId)
         .order('set_number')
 
-      // Build exercise sessions from URL param or existing sets
       const exerciseIdsFromUrl = searchParams.get('exercises')?.split(',').filter(Boolean) ?? []
       const exerciseIdsFromSets = [...new Set((existingSets ?? []).map((s: WorkoutSet) => s.exercise_id))]
       const exerciseIds = exerciseIdsFromUrl.length > 0 ? exerciseIdsFromUrl : exerciseIdsFromSets
@@ -64,7 +64,6 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
       }))
       setExerciseSessions(sessions)
 
-      // Compute progressive overload hints from historical data
       const { data: historicalSets } = await supabase
         .from('workout_sets')
         .select('*')
@@ -119,7 +118,8 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
     )
   }
 
-  async function finishWorkout() {
+  const finishWorkout = useCallback(async () => {
+    if (finishing) return
     setFinishing(true)
     const supabase = createClient()
     await supabase
@@ -127,6 +127,22 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
       .update({ finished_at: new Date().toISOString() })
       .eq('id', workoutId)
     router.push('/history')
+  }, [finishing, workoutId, router])
+
+  async function saveAsTemplate() {
+    setSavingTemplate(true)
+    const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+    const exerciseIds = exerciseSessions.map(s => s.exerciseId)
+    await supabase.from('workout_templates').insert({
+      user_id: user.id,
+      name: templateName || workout?.name || 'My Template',
+      exercise_ids: exerciseIds,
+    })
+    setSavingTemplate(false)
+    setShowTemplateSave(false)
+    setTemplateSaved(true)
   }
 
   const isFinished = workout?.finished_at != null
@@ -137,57 +153,87 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">{workout?.name ?? 'Workout'}</h1>
-          <p className="text-sm text-muted-foreground">
-            {isFinished ? 'Completed' : `${totalSets} sets logged`}
+    <div className="space-y-5 pb-8">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-bold truncate">{workout?.name ?? 'Workout'}</h1>
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {isFinished ? 'Completed' : `${totalSets} set${totalSets !== 1 ? 's' : ''} logged`}
           </p>
         </div>
-        {!isFinished && (
-          <Button onClick={finishWorkout} disabled={finishing} size="sm" className="gap-1.5">
+        {!isFinished ? (
+          <Button onClick={finishWorkout} disabled={finishing} size="sm" className="gap-1.5 shrink-0">
             <CheckCircle className="h-4 w-4" />
             {finishing ? 'Saving...' : 'Finish'}
+          </Button>
+        ) : (
+          <Button
+            onClick={() => setShowTemplateSave(v => !v)}
+            size="sm"
+            className="gap-1.5 shrink-0"
+            disabled={templateSaved}
+          >
+            {templateSaved ? <Check className="h-4 w-4" /> : <BookmarkPlus className="h-4 w-4" />}
+            {templateSaved ? 'Saved!' : 'Save template'}
           </Button>
         )}
       </div>
 
+      {/* Stopwatch — only shown during active workout */}
+      {!isFinished && workout?.started_at && (
+        <WorkoutStopwatch startedAt={workout.started_at} onAutoFinish={finishWorkout} />
+      )}
+
+      {/* Inline template name input */}
+      {isFinished && showTemplateSave && !templateSaved && (
+        <div className="flex gap-2">
+          <input
+            value={templateName}
+            onChange={e => setTemplateName(e.target.value)}
+            placeholder="Template name"
+            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-foreground focus:border-primary/50 focus:outline-none"
+          />
+          <Button onClick={saveAsTemplate} disabled={savingTemplate} size="sm">
+            {savingTemplate ? 'Saving...' : 'Save'}
+          </Button>
+        </div>
+      )}
+
+      {/* Exercise cards */}
       {exerciseSessions.map(({ exerciseId, sets }) => {
         const ex = getExerciseById(exerciseId) ?? EXERCISES.find(e => e.id === exerciseId)
         if (!ex) return null
         return (
-          <Card key={exerciseId}>
-            <CardHeader className="pb-3">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-base">{ex.name}</CardTitle>
-                  <Badge variant="secondary" className="mt-1 capitalize text-xs">
-                    {ex.primary_muscle}
-                  </Badge>
-                </div>
-                {ex.youtube_url && (
-                  <a
-                    href={ex.youtube_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-muted-foreground hover:text-foreground"
-                  >
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                )}
+          <div key={exerciseId} className="rounded-2xl border border-white/8 card-luxury overflow-hidden">
+            <div className="px-4 py-3 flex items-start justify-between border-b border-white/6">
+              <div>
+                <p className="font-semibold text-sm">{ex.name}</p>
+                <span className="mt-1 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary capitalize">
+                  {ex.primary_muscle}
+                </span>
               </div>
-            </CardHeader>
-            <Separator />
-            <CardContent className="pt-4">
+              {ex.youtube_url && (
+                <a
+                  href={ex.youtube_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-foreground mt-0.5"
+                >
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+              )}
+            </div>
+            <div className="p-4">
               {isFinished ? (
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   {sets.map(s => (
                     <div key={s.set_number} className="flex gap-4 text-sm">
-                      <span className="text-muted-foreground w-6">#{s.set_number}</span>
+                      <span className="text-muted-foreground w-6 tabular-nums">#{s.set_number}</span>
                       <span>{s.weight_kg}kg × {s.reps} reps</span>
                     </div>
                   ))}
+                  {sets.length === 0 && <p className="text-xs text-muted-foreground">No sets logged</p>}
                 </div>
               ) : (
                 <SetLogger
@@ -198,8 +244,8 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
                   onDeleteSet={(n) => handleDeleteSet(exerciseId, n)}
                 />
               )}
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )
       })}
     </div>

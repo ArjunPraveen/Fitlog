@@ -95,24 +95,34 @@ function NewWorkoutContent() {
         />
       </div>
 
-      {mode === 'template' && templates.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Your Templates</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
-            {templates.map(t => (
-              <button
-                key={t.id}
-                onClick={() => loadTemplate(t)}
-                className="flex w-full items-center justify-between rounded-md border px-3 py-2 text-left text-sm hover:bg-muted"
-              >
-                <span>{t.name}</span>
-                <span className="text-muted-foreground">{t.exercise_ids.length} exercises</span>
-              </button>
-            ))}
-          </CardContent>
-        </Card>
+      {mode === 'template' && (
+        <div className="space-y-2">
+          <p className="text-xs tracking-widest uppercase text-muted-foreground">Your Templates</p>
+          {templates.length === 0 ? (
+            <p className="text-sm text-muted-foreground py-4 text-center rounded-xl border border-white/8">
+              No templates yet — finish a workout and save it as a template.
+            </p>
+          ) : (
+            templates.map(t => {
+              const loaded = t.exercise_ids.every(id => selectedExercises.includes(id))
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => loadTemplate(t)}
+                  className={`flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left transition-colors ${
+                    loaded ? 'border-primary/40 bg-primary/8' : 'border-white/8 card-luxury hover:border-white/15'
+                  }`}
+                >
+                  <div>
+                    <p className="font-semibold text-sm">{t.name}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{t.exercise_ids.length} exercise{t.exercise_ids.length !== 1 ? 's' : ''}</p>
+                  </div>
+                  {loaded && <span className="text-xs text-primary font-medium">Loaded</span>}
+                </button>
+              )
+            })
+          )}
+        </div>
       )}
 
       <div className="space-y-3">

@@ -5,6 +5,7 @@ import { DashboardCards } from '@/components/DashboardCards'
 import { PageTransition } from '@/components/PageTransition'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
+import { Dumbbell, ChevronRight } from 'lucide-react'
 import type { MuscleGroup } from '@/types'
 
 export default async function DashboardPage() {
@@ -13,7 +14,7 @@ export default async function DashboardPage() {
 
   const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [{ data: recentSets }, { data: activeWorkout }] = await Promise.all([
+  const [{ data: recentSets }, { data: activeWorkout }, { data: recentWorkouts }] = await Promise.all([
     supabase
       .from('workout_sets')
       .select('logged_at, exercise_id, workouts!inner(user_id)')
@@ -28,9 +29,15 @@ export default async function DashboardPage() {
       .order('started_at', { ascending: false })
       .limit(1)
       .maybeSingle(),
+    supabase
+      .from('workouts')
+      .select('id, name, finished_at')
+      .eq('user_id', user!.id)
+      .not('finished_at', 'is', null)
+      .order('finished_at', { ascending: false })
+      .limit(3),
   ])
 
-  // Map exercise_id to primary_muscle using hardcoded library
   const { getExerciseById } = await import('@/lib/exercises')
   const setsForRecovery = (recentSets ?? []).map((s: any) => ({
     exercise_primary_muscle: (getExerciseById(s.exercise_id)?.primary_muscle ?? 'core') as MuscleGroup,
@@ -67,6 +74,38 @@ export default async function DashboardPage() {
         )}
 
         <DashboardCards />
+
+        {/* Recent workouts */}
+        {recentWorkouts && recentWorkouts.length > 0 && (
+          <div>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xs tracking-widest uppercase text-muted-foreground">Recent Workouts</h2>
+              <Link href="/history" className="text-xs text-primary hover:text-primary/80 transition-colors">
+                See all
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {recentWorkouts.map((w: any) => (
+                <Link key={w.id} href={`/workout/${w.id}`}>
+                  <div className="flex items-center justify-between rounded-xl border border-white/8 card-luxury px-4 py-3 cursor-pointer hover:border-white/15 transition-colors">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15">
+                        <Dumbbell className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="font-medium text-sm">{w.name ?? 'Workout'}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {new Date(w.finished_at).toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </p>
+                      </div>
+                    </div>
+                    <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div>
           <h2 className="text-xs tracking-widest uppercase text-muted-foreground mb-4">Muscle Recovery</h2>
