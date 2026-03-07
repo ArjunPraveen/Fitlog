@@ -1,0 +1,122 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans, 'Figtree', sans-serif);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* Elegant Luxury — always dark */
+:root {
+  --background: oklch(0.11 0.008 285);
+  --foreground: oklch(0.93 0.015 72);
+  --card: oklch(0.16 0.01 280);
+  --card-foreground: oklch(0.93 0.015 72);
+  --popover: oklch(0.16 0.01 280);
+  --popover-foreground: oklch(0.93 0.015 72);
+  --primary: oklch(0.72 0.09 72);
+  --primary-foreground: oklch(0.11 0.008 285);
+  --secondary: oklch(0.22 0.012 280);
+  --secondary-foreground: oklch(0.85 0.02 72);
+  --muted: oklch(0.20 0.010 280);
+  --muted-foreground: oklch(0.58 0.02 72);
+  --accent: oklch(0.72 0.09 72);
+  --accent-foreground: oklch(0.11 0.008 285);
+  --destructive: oklch(0.65 0.22 25);
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 10%);
+  --ring: oklch(0.72 0.09 72 / 50%);
+  --chart-1: oklch(0.78 0.13 72);
+  --chart-2: oklch(0.65 0.15 50);
+  --chart-3: oklch(0.55 0.14 35);
+  --chart-4: oklch(0.45 0.10 30);
+  --chart-5: oklch(0.35 0.07 25);
+  --radius: 0.75rem;
+
+  /* Gold gradient stops — used in custom utilities */
+  --gold-light: oklch(0.80 0.10 82);
+  --gold-mid:   oklch(0.72 0.09 72);
+  --gold-dark:  oklch(0.58 0.08 58);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans;
+    /* Subtle noise texture for depth */
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  }
+}
+
+@layer utilities {
+  /* Gold gradient text */
+  .text-gold {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-mid), var(--gold-dark));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Gold gradient background */
+  .bg-gold {
+    background: linear-gradient(135deg, var(--gold-light), var(--gold-mid), var(--gold-dark));
+  }
+
+  /* Subtle gold glow */
+  .glow-gold {
+    box-shadow: 0 0 16px oklch(0.72 0.09 72 / 18%), 0 0 40px oklch(0.72 0.09 72 / 7%);
+  }
+
+  /* Card with gold top border accent */
+  .card-luxury {
+    border-top: 1px solid oklch(0.78 0.13 72 / 30%);
+    background: linear-gradient(160deg, oklch(0.18 0.012 280), oklch(0.14 0.008 285));
+  }
+
+  /* Bottom safe area padding for nav */
+  .pb-nav {
+    padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
+  }
+}
