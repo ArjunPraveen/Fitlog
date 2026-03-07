@@ -9,7 +9,7 @@ import { SetLogger } from '@/components/SetLogger'
 import { WorkoutStopwatch } from '@/components/WorkoutStopwatch'
 import type { LoggedSet } from '@/components/SetLogger'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, ExternalLink, BookmarkPlus, Check } from 'lucide-react'
+import { CheckCircle, ExternalLink, BookmarkPlus, Check, Trash2 } from 'lucide-react'
 import type { WorkoutSet } from '@/types'
 
 interface ExerciseSession {
@@ -27,6 +27,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const [overloadHints, setOverloadHints] = useState<Record<string, string>>({})
   const [finishing, setFinishing] = useState(false)
   const [loading, setLoading] = useState(true)
+  const [confirmCancel, setConfirmCancel] = useState(false)
   const [savingTemplate, setSavingTemplate] = useState(false)
   const [templateName, setTemplateName] = useState('')
   const [showTemplateSave, setShowTemplateSave] = useState(false)
@@ -118,6 +119,12 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
     )
   }
 
+  async function cancelWorkout() {
+    const supabase = createClient()
+    await supabase.from('workouts').delete().eq('id', workoutId)
+    router.push('/dashboard')
+  }
+
   const finishWorkout = useCallback(async () => {
     if (finishing) return
     setFinishing(true)
@@ -163,10 +170,19 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </p>
         </div>
         {!isFinished ? (
-          <Button onClick={finishWorkout} disabled={finishing} size="sm" className="gap-1.5 shrink-0">
-            <CheckCircle className="h-4 w-4" />
-            {finishing ? 'Saving...' : 'Finish'}
-          </Button>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setConfirmCancel(v => !v)}
+              className="flex h-8 w-8 items-center justify-center rounded-lg text-muted-foreground hover:text-red-400 hover:bg-red-400/10 transition-colors"
+              aria-label="Cancel workout"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+            <Button onClick={finishWorkout} disabled={finishing} size="sm" className="gap-1.5">
+              <CheckCircle className="h-4 w-4" />
+              {finishing ? 'Saving...' : 'Finish'}
+            </Button>
+          </div>
         ) : (
           <Button
             onClick={() => setShowTemplateSave(v => !v)}
@@ -179,6 +195,27 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </Button>
         )}
       </div>
+
+      {/* Cancel confirmation */}
+      {confirmCancel && !isFinished && (
+        <div className="flex items-center justify-between rounded-xl border border-red-500/30 bg-red-500/8 px-4 py-3">
+          <p className="text-sm text-red-400">Delete this workout?</p>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setConfirmCancel(false)}
+              className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Keep it
+            </button>
+            <button
+              onClick={cancelWorkout}
+              className="rounded-lg bg-red-500/20 border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/30 transition-colors"
+            >
+              Yes, delete
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Stopwatch — only shown during active workout */}
       {!isFinished && workout?.started_at && (

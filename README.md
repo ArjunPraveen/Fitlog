@@ -18,6 +18,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 | 7 | **Save as template (from workout)** — "Save template" button on completed workout pages with inline name input, saves to `workout_templates` |
 | 8 | **Stopwatch + history by day + template from history + dashboard recents** — live 2.5h auto-finishing stopwatch; history grouped by day with in-progress workouts surfaced; save-as-template on each history card; last 3 workouts on dashboard; DB migration: `exercise_ids` `UUID[]` → `TEXT[]` |
 | 9 | **Stopwatch UI + button fix** — stopwatch enlarged to 6xl centred display; fixed base-ui `nativeButton` warning on Resume button in dashboard |
+| 10 | **Cancel workout** — trash icon in active workout header triggers an inline confirmation banner; confirms before deleting the workout and returning to dashboard |
 
 </details>
 
