@@ -11,8 +11,8 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
-| 16 | 2026-03-09 | **Fix resume session missing exercises** — exercises now stored on the `workouts` row (`exercise_ids TEXT[]`); resume always shows correct exercises even before any sets are logged. DB migration required: `ALTER TABLE public.workouts ADD COLUMN IF NOT EXISTS exercise_ids TEXT[] DEFAULT '{}';` |
 | 17 | 2026-03-09 | **YouTube icon + green hierarchy** — replaced `ExternalLink` with `Youtube` icon (red) on exercise cards, detail page, and list; reserved bright lime for primary CTAs only; icon containers and muscle tags changed to neutral white/grey |
+| 16 | 2026-03-09 | **Fix resume session missing exercises** — exercises now stored on the `workouts` row (`exercise_ids TEXT[]`); resume always shows correct exercises even before any sets are logged. DB migration required: `ALTER TABLE public.workouts ADD COLUMN IF NOT EXISTS exercise_ids TEXT[] DEFAULT '{}';` |
 | 15 | 2026-03-09 | **Time-based greeting + empty workout guard** — dashboard greeting changes based on time of day (morning/afternoon/evening); finishing a workout with 0 sets shows an amber confirmation asking if it was intentional, offering to delete the session |
 | 14 | 2026-03-09 | **Type fix + auto workout name + dashboard tweak** — fixed type error on workout page (partial select cast); workouts now auto-named from muscle groups e.g. "Chest & Back Day", "Legs, Shoulders & Arms Day"; reduced recent workouts on dashboard from 3 → 1 |
 | 13 | 2026-03-09 | **Nav speed fixes** — `loading.tsx` skeletons on dashboard/history/progress so skeleton appears instantly on tab click; switched proxy.ts from `getUser()` (Supabase network call) to `getSession()` (local cookie decode) eliminating ~200ms auth roundtrip per navigation |
