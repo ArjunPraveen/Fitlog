@@ -4,22 +4,24 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 ---
 
-<details>
-<summary><strong>Iterations</strong></summary>
+## Iterations
 
-| # | What changed |
-|---|---|
-| 1 | **Initial scaffold** — Next.js + Supabase monolith, DB schema + RLS, 28-exercise hardcoded library, muscle recovery engine, progressive overload hints, Strava-style social follow system |
-| 2 | **Elegant Luxury UI** — dark theme with muted gold accent, floating bottom nav (4 icons), Framer Motion transitions + stagger + recovery bar animations, Figtree font, fixed CSS variable scoping for Next.js font |
-| 3 | **Font + colour tweaks** — tried Space Grotesk → settled on Figtree; toned down gold to a more muted warm tone |
-| 4 | **Layout fixes** — equalised workout-entry card heights; fixed sticky CTA appearing behind bottom nav |
-| 5 | **Docs + GitHub** — wrote README, pushed to `ArjunPraveen/Fitlog` via correct GitHub account |
-| 6 | **Supabase connection** — ran schema SQL, added `.env.local`, restored all real queries, renamed `middleware.ts` → `proxy.ts` for Next.js 16 |
-| 7 | **Save as template (from workout)** — "Save template" button on completed workout pages with inline name input, saves to `workout_templates` |
-| 8 | **Stopwatch + history by day + template from history + dashboard recents** — live 2.5h auto-finishing stopwatch; history grouped by day with in-progress workouts surfaced; save-as-template on each history card; last 3 workouts on dashboard; DB migration: `exercise_ids` `UUID[]` → `TEXT[]` |
-| 9 | **Stopwatch UI + button fix** — stopwatch enlarged to 6xl centred display; fixed base-ui `nativeButton` warning on Resume button in dashboard |
-| 10 | **Cancel workout** — trash icon in active workout header triggers an inline confirmation banner; confirms before deleting the workout and returning to dashboard |
-| 11 | **Athletic Dark redesign** — replaced Elegant Luxury theme with Athletic Dark: pure black bg, electric lime accent (`oklch(0.88 0.26 130)`), `Barlow Condensed` for display/headings + `DM Sans` for body, lime active states throughout, sharper cards with subtle lime top border, stopwatch uses Barlow Condensed 8xl |
+<details>
+<summary>View all iterations</summary>
+
+| # | Date | What changed |
+|---|---|---|
+| 11 | 2026-03-08 | **Athletic Dark redesign** — replaced Elegant Luxury theme with Athletic Dark: pure black bg, electric lime accent (`oklch(0.88 0.26 130)`), `Barlow Condensed` for display/headings + `DM Sans` for body, lime active states throughout, sharper cards with subtle lime top border, stopwatch uses Barlow Condensed 8xl |
+| 10 | 2026-03-08 | **Cancel workout** — trash icon in active workout header triggers an inline confirmation banner; confirms before deleting the workout and returning to dashboard |
+| 9 | 2026-03-08 | **Stopwatch UI + button fix** — stopwatch enlarged to 6xl centred display; fixed base-ui `nativeButton` warning on Resume button in dashboard |
+| 8 | 2026-03-08 | **Stopwatch + history by day + template from history + dashboard recents** — live 2.5h auto-finishing stopwatch; history grouped by day with in-progress workouts surfaced; save-as-template on each history card; last 3 workouts on dashboard; DB migration: `exercise_ids` `UUID[]` → `TEXT[]` |
+| 7 | 2026-03-08 | **Save as template (from workout)** — "Save template" button on completed workout pages with inline name input, saves to `workout_templates` |
+| 6 | 2026-03-08 | **Supabase connection** — ran schema SQL, added `.env.local`, restored all real queries, renamed `middleware.ts` → `proxy.ts` for Next.js 16 |
+| 5 | 2026-03-07 | **Docs + GitHub** — wrote README, pushed to `ArjunPraveen/Fitlog` via correct GitHub account |
+| 4 | 2026-03-07 | **Layout fixes** — equalised workout-entry card heights; fixed sticky CTA appearing behind bottom nav |
+| 3 | 2026-03-07 | **Font + colour tweaks** — tried Space Grotesk → settled on Figtree; toned down gold to a more muted warm tone |
+| 2 | 2026-03-07 | **Elegant Luxury UI** — dark theme with muted gold accent, floating bottom nav (4 icons), Framer Motion transitions + stagger + recovery bar animations, Figtree font, fixed CSS variable scoping for Next.js font |
+| 1 | 2026-03-07 | **Initial scaffold** — Next.js + Supabase monolith, DB schema + RLS, 28-exercise hardcoded library, muscle recovery engine, progressive overload hints, Strava-style social follow system |
 
 </details>
 
