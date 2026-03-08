@@ -12,6 +12,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 | # | Date | What changed |
 |---|---|---|
 | 16 | 2026-03-09 | **Fix resume session missing exercises** — exercises now stored on the `workouts` row (`exercise_ids TEXT[]`); resume always shows correct exercises even before any sets are logged. DB migration required: `ALTER TABLE public.workouts ADD COLUMN IF NOT EXISTS exercise_ids TEXT[] DEFAULT '{}';` |
+| 17 | 2026-03-09 | **YouTube icon + green hierarchy** — replaced `ExternalLink` with `Youtube` icon (red) on exercise cards, detail page, and list; reserved bright lime for primary CTAs only; icon containers and muscle tags changed to neutral white/grey |
 | 15 | 2026-03-09 | **Time-based greeting + empty workout guard** — dashboard greeting changes based on time of day (morning/afternoon/evening); finishing a workout with 0 sets shows an amber confirmation asking if it was intentional, offering to delete the session |
 | 14 | 2026-03-09 | **Type fix + auto workout name + dashboard tweak** — fixed type error on workout page (partial select cast); workouts now auto-named from muscle groups e.g. "Chest & Back Day", "Legs, Shoulders & Arms Day"; reduced recent workouts on dashboard from 3 → 1 |
 | 13 | 2026-03-09 | **Nav speed fixes** — `loading.tsx` skeletons on dashboard/history/progress so skeleton appears instantly on tab click; switched proxy.ts from `getUser()` (Supabase network call) to `getSession()` (local cookie decode) eliminating ~200ms auth roundtrip per navigation |
@@ -34,14 +35,54 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 ## Ideas / To-Do
 
-- [ ] **Revamp Suggested workouts** — smarter recovery-based suggestions, better UX for the suggested mode flow
-- [ ] **Add more exercises** — expand the hardcoded library beyond 28; cover more variations and muscle groups
-- [ ] **Basic workout analysis** — short AI-style summary message based on the last few sessions (volume trends, consistency streaks)
-- [ ] **Funny gym pun validation messages** — replace generic error/empty states with gym humour (e.g. "No pain no gain… but also no sets logged")
-- [ ] **Client-side caching** — React Query / SWR for server data so navigating back to a page is instant
-- [ ] **Revamp Progress page** — richer charts, friend workout details visible in the Progress tab
-- [ ] **Granular privacy toggle** — make workouts public but keep exercise-level detail (weights, reps) private
-- [ ] **Gym Stack pin animation** — visual stacked/pinned card UI when selecting exercises, with satisfying pin animations
+### Active Workout UX
+- [ ] Show previous workout performance per exercise (e.g. "Last: 20kg × 8")
+- [ ] Table-style set layout (Set | Weight | Reps | Done) instead of stacked inputs
+- [ ] Increase weight/reps input height to ~44–50px for easier tapping
+- [ ] Auto-fill weight and reps from the previous set
+- [ ] Change "+ button" to "+ Add Set" for clarity
+- [ ] Show set progress indicator (e.g. "2 / 3 sets")
+- [ ] Add automatic rest timer after each set is logged
+- [ ] Visual feedback / animation when a set is logged
+- [ ] Rename "Finish" → "Finish Workout" with a confirmation step
+- [ ] Replace the expand icon (↗) with a clearer info/menu icon
+- [ ] Reduce timer size so exercises get more screen focus
+- [ ] Reduce overuse of green to improve visual hierarchy
+- [ ] **Gym Stack pin animation** — stacked/pinned card UI when selecting exercises
+
+### Dashboard & Recovery
+- [ ] Replace "READY" label with actual recovery percentage
+- [ ] Color-coded recovery bars (green / yellow / red) based on fatigue level
+- [ ] Show suggested workout on the Suggested card (e.g. "Chest + Back")
+- [ ] Add workout streak tracking on the home screen
+- [ ] Auto-generate workout suggestions based on schedule and recovery
+- [ ] **Revamp Suggested workouts** — smarter recovery-based suggestions
+
+### Progress & Stats
+- [ ] Show workout volume stats (total sets, tonnage) in Progress
+- [ ] Add PR (personal record) detection and celebration
+- [ ] Add progressive overload suggestions based on last session
+- [ ] Basic workout analysis message based on the last few sessions
+- [ ] Replace default-looking dropdown in Progress with a styled selector/search
+- [ ] **Revamp Progress page** — richer charts, friends' workout details in Progress tab
+
+### Exercise Library
+- [ ] Add more exercises — expand beyond 28, more variations and muscle groups
+- [ ] Add exercise metadata (muscle group, equipment) visible in the picker
+- [ ] Improve exercise picker UI — less plain list, more visual
+
+### Profile & Social
+- [ ] **Granular privacy toggle** — workouts public, but weights/reps private
+- [ ] Simplify Profile page — remove rarely-used social/privacy options
+
+### Polish & Feel
+- [ ] Micro-animations for taps and selections
+- [ ] Add empty states for all screens with no data
+- [ ] Improve bottom nav active state — stronger highlight, clearer icons
+- [ ] Reduce muscle tag pill size
+- [ ] Increase card padding to ~20px for cleaner spacing
+- [ ] **Funny gym pun validation messages** — replace generic errors with gym humour
+- [ ] **Client-side caching** — React Query / SWR for instant back-navigation
 
 ---
 

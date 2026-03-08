@@ -2,7 +2,7 @@ import { getExerciseById } from '@/lib/exercises'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { notFound } from 'next/navigation'
-import { ExternalLink, ArrowLeft } from 'lucide-react'
+import { Youtube, ArrowLeft } from 'lucide-react'
 import Link from 'next/link'
 
 export default async function ExerciseDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -41,7 +41,7 @@ export default async function ExerciseDetailPage({ params }: { params: Promise<{
       {exercise.youtube_url && (
         <a href={exercise.youtube_url} target="_blank" rel="noopener noreferrer">
           <Button variant="outline" className="gap-2 w-full">
-            <ExternalLink className="h-4 w-4" />
+            <Youtube className="h-4 w-4 text-red-500" />
             Watch on YouTube
           </Button>
         </a>

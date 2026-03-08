@@ -92,8 +92,8 @@ export default async function DashboardPage() {
                 <Link key={w.id} href={`/workout/${w.id}`}>
                   <div className="flex items-center justify-between rounded-xl border border-white/8 card-luxury px-4 py-3 cursor-pointer hover:border-white/15 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/15">
-                        <Dumbbell className="h-4 w-4 text-primary" />
+                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/6">
+                        <Dumbbell className="h-4 w-4 text-muted-foreground" />
                       </div>
                       <div>
                         <p className="font-medium text-sm">{w.name ?? 'Workout'}</p>

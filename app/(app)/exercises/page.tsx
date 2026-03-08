@@ -6,7 +6,7 @@ import { motion } from 'framer-motion'
 import { EXERCISES, EXERCISES_BY_MUSCLE } from '@/lib/exercises'
 import { PageTransition } from '@/components/PageTransition'
 import { Input } from '@/components/ui/input'
-import { Search, ExternalLink, ChevronRight } from 'lucide-react'
+import { Search, Youtube, ChevronRight } from 'lucide-react'
 import type { MuscleGroup } from '@/types'
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core']
@@ -107,7 +107,7 @@ export default function ExercisesPage() {
                     <span className="font-medium text-sm">{ex.name}</span>
                   </div>
                   <div className="flex items-center gap-2 text-muted-foreground">
-                    {ex.youtube_url && <ExternalLink className="h-3.5 w-3.5" />}
+                    {ex.youtube_url && <Youtube className="h-3.5 w-3.5 text-red-500" />}
                     <ChevronRight className="h-4 w-4" />
                   </div>
                 </motion.div>

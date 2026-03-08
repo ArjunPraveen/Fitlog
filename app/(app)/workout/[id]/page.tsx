@@ -9,7 +9,7 @@ import { SetLogger } from '@/components/SetLogger'
 import { WorkoutStopwatch } from '@/components/WorkoutStopwatch'
 import type { LoggedSet } from '@/components/SetLogger'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, ExternalLink, BookmarkPlus, Check, Trash2 } from 'lucide-react'
+import { CheckCircle, Youtube, BookmarkPlus, Check, Trash2 } from 'lucide-react'
 import type { WorkoutSet } from '@/types'
 
 interface ExerciseSession {
@@ -277,7 +277,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
             <div className="px-4 py-3 flex items-start justify-between border-b border-white/6">
               <div>
                 <p className="font-semibold text-sm">{ex.name}</p>
-                <span className="mt-1 inline-block rounded-full bg-primary/15 px-2 py-0.5 text-[11px] font-medium text-primary capitalize">
+                <span className="mt-1 inline-block rounded-full bg-white/8 px-2 py-0.5 text-[11px] font-medium text-muted-foreground capitalize">
                   {ex.primary_muscle}
                 </span>
               </div>
@@ -286,9 +286,9 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
                   href={ex.youtube_url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-muted-foreground hover:text-foreground mt-0.5"
+                  className="text-muted-foreground hover:text-red-500 transition-colors mt-0.5"
                 >
-                  <ExternalLink className="h-4 w-4" />
+                  <Youtube className="h-4 w-4" />
                 </a>
               )}
             </div>
