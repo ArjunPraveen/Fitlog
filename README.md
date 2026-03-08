@@ -11,6 +11,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
+| 14 | 2026-03-09 | **Type fix + auto workout name + dashboard tweak** — fixed type error on workout page (partial select cast); workouts now auto-named from muscle groups e.g. "Chest & Back Day", "Legs, Shoulders & Arms Day"; reduced recent workouts on dashboard from 3 → 1 |
 | 13 | 2026-03-09 | **Nav speed fixes** — `loading.tsx` skeletons on dashboard/history/progress so skeleton appears instantly on tab click; switched proxy.ts from `getUser()` (Supabase network call) to `getSession()` (local cookie decode) eliminating ~200ms auth roundtrip per navigation |
 | 12 | 2026-03-09 | **Performance fixes** — static import for exercises (was dynamic `await import()` on every dashboard render); parallelised workout + sets fetches (`Promise.all`); overload hints now load non-blocking after page renders; reduced historical sets query from 200 → 60 rows; added limit to dashboard sets query |
 | 11 | 2026-03-08 | **Athletic Dark redesign** — replaced Elegant Luxury theme with Athletic Dark: pure black bg, electric lime accent (`oklch(0.88 0.26 130)`), `Barlow Condensed` for display/headings + `DM Sans` for body, lime active states throughout, sharper cards with subtle lime top border, stopwatch uses Barlow Condensed 8xl |

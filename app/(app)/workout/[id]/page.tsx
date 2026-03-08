@@ -72,7 +72,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           .order('logged_at', { ascending: false })
           .limit(60)
           .then(({ data: historicalSets }) => {
-            const hints = computeProgressiveOverload(historicalSets ?? [], exerciseIds)
+            const hints = computeProgressiveOverload((historicalSets ?? []) as any[], exerciseIds)
             const msgs: Record<string, string> = {}
             for (const [eid, hint] of Object.entries(hints)) msgs[eid] = hint.note
             setOverloadHints(msgs)

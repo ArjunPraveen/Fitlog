@@ -37,7 +37,7 @@ export default async function DashboardPage() {
       .eq('user_id', user!.id)
       .not('finished_at', 'is', null)
       .order('finished_at', { ascending: false })
-      .limit(3),
+      .limit(1),
   ])
 
   const setsForRecovery = (recentSets ?? []).map((s: any) => ({

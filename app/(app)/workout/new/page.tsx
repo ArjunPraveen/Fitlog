@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { EXERCISES, EXERCISES_BY_MUSCLE } from '@/lib/exercises'
+import { EXERCISES, EXERCISES_BY_MUSCLE, getExerciseById } from '@/lib/exercises'
 import type { MuscleGroup } from '@/types'
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core']
@@ -46,6 +46,15 @@ function NewWorkoutContent() {
     )
   }
 
+  function autoName() {
+    const muscles = [...new Set(selectedExercises.map(id => getExerciseById(id)?.primary_muscle).filter(Boolean))] as string[]
+    const labelled = muscles.map(m => m.charAt(0).toUpperCase() + m.slice(1))
+    if (labelled.length === 0) return null
+    if (labelled.length === 1) return `${labelled[0]} Day`
+    if (labelled.length === 2) return `${labelled[0]} & ${labelled[1]} Day`
+    return `${labelled.slice(0, -1).join(', ')} & ${labelled[labelled.length - 1]} Day`
+  }
+
   async function startWorkout() {
     if (selectedExercises.length === 0) return
     setLoading(true)
@@ -57,7 +66,7 @@ function NewWorkoutContent() {
       .from('workouts')
       .insert({
         user_id: user.id,
-        name: workoutName || null,
+        name: workoutName || autoName(),
         started_at: new Date().toISOString(),
       })
       .select('id')
