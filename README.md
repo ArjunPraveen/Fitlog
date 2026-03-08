@@ -11,6 +11,8 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
+| 16 | 2026-03-09 | **Fix resume session missing exercises** — exercises now stored on the `workouts` row (`exercise_ids TEXT[]`); resume always shows correct exercises even before any sets are logged. DB migration required: `ALTER TABLE public.workouts ADD COLUMN IF NOT EXISTS exercise_ids TEXT[] DEFAULT '{}';` |
+| 15 | 2026-03-09 | **Time-based greeting + empty workout guard** — dashboard greeting changes based on time of day (morning/afternoon/evening); finishing a workout with 0 sets shows an amber confirmation asking if it was intentional, offering to delete the session |
 | 14 | 2026-03-09 | **Type fix + auto workout name + dashboard tweak** — fixed type error on workout page (partial select cast); workouts now auto-named from muscle groups e.g. "Chest & Back Day", "Legs, Shoulders & Arms Day"; reduced recent workouts on dashboard from 3 → 1 |
 | 13 | 2026-03-09 | **Nav speed fixes** — `loading.tsx` skeletons on dashboard/history/progress so skeleton appears instantly on tab click; switched proxy.ts from `getUser()` (Supabase network call) to `getSession()` (local cookie decode) eliminating ~200ms auth roundtrip per navigation |
 | 12 | 2026-03-09 | **Performance fixes** — static import for exercises (was dynamic `await import()` on every dashboard render); parallelised workout + sets fetches (`Promise.all`); overload hints now load non-blocking after page renders; reduced historical sets query from 200 → 60 rows; added limit to dashboard sets query |
@@ -27,6 +29,19 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 | 1 | 2026-03-07 | **Initial scaffold** — Next.js + Supabase monolith, DB schema + RLS, 28-exercise hardcoded library, muscle recovery engine, progressive overload hints, Strava-style social follow system |
 
 </details>
+
+---
+
+## Ideas / To-Do
+
+- [ ] **Revamp Suggested workouts** — smarter recovery-based suggestions, better UX for the suggested mode flow
+- [ ] **Add more exercises** — expand the hardcoded library beyond 28; cover more variations and muscle groups
+- [ ] **Basic workout analysis** — short AI-style summary message based on the last few sessions (volume trends, consistency streaks)
+- [ ] **Funny gym pun validation messages** — replace generic error/empty states with gym humour (e.g. "No pain no gain… but also no sets logged")
+- [ ] **Client-side caching** — React Query / SWR for server data so navigating back to a page is instant
+- [ ] **Revamp Progress page** — richer charts, friend workout details visible in the Progress tab
+- [ ] **Granular privacy toggle** — make workouts public but keep exercise-level detail (weights, reps) private
+- [ ] **Gym Stack pin animation** — visual stacked/pinned card UI when selecting exercises, with satisfying pin animations
 
 ---
 

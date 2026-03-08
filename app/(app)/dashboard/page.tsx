@@ -48,12 +48,14 @@ export default async function DashboardPage() {
   const recovery = computeMuscleRecovery(setsForRecovery)
   const { readyMuscles } = buildSuggestion(recovery)
   const userName = user?.user_metadata?.name ?? 'there'
+  const hour = new Date().getHours()
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
   return (
     <PageTransition>
       <div className="space-y-7">
         <div className="pt-2">
-          <p className="text-sm text-muted-foreground mb-1 tracking-widest uppercase">Good morning</p>
+          <p className="text-sm text-muted-foreground mb-1 tracking-widest uppercase">{greeting}</p>
           <h1 className="text-4xl font-bold text-gold leading-tight">{userName}</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {readyMuscles.length > 0

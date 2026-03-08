@@ -23,11 +23,12 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const router = useRouter()
 
   const [exerciseSessions, setExerciseSessions] = useState<ExerciseSession[]>([])
-  const [workout, setWorkout] = useState<{ name: string | null; finished_at: string | null; started_at: string } | null>(null)
+  const [workout, setWorkout] = useState<{ name: string | null; finished_at: string | null; started_at: string; exercise_ids?: string[] } | null>(null)
   const [overloadHints, setOverloadHints] = useState<Record<string, string>>({})
   const [finishing, setFinishing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [confirmCancel, setConfirmCancel] = useState(false)
+  const [confirmEmpty, setConfirmEmpty] = useState(false)
   const [savingTemplate, setSavingTemplate] = useState(false)
   const [templateName, setTemplateName] = useState('')
   const [showTemplateSave, setShowTemplateSave] = useState(false)
@@ -41,7 +42,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
 
       // Fetch workout metadata + existing sets in parallel
       const [{ data: w }, { data: existingSets }] = await Promise.all([
-        supabase.from('workouts').select('name, finished_at, started_at').eq('id', workoutId).single(),
+        supabase.from('workouts').select('name, finished_at, started_at, exercise_ids').eq('id', workoutId).single(),
         supabase.from('workout_sets').select('*').eq('workout_id', workoutId).order('set_number'),
       ])
 
@@ -50,7 +51,12 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
 
       const exerciseIdsFromUrl = searchParams.get('exercises')?.split(',').filter(Boolean) ?? []
       const exerciseIdsFromSets = [...new Set((existingSets ?? []).map((s: WorkoutSet) => s.exercise_id))]
-      const exerciseIds = exerciseIdsFromUrl.length > 0 ? exerciseIdsFromUrl : exerciseIdsFromSets
+      const exerciseIdsFromWorkout: string[] = (w as any)?.exercise_ids ?? []
+      const exerciseIds = exerciseIdsFromUrl.length > 0
+        ? exerciseIdsFromUrl
+        : exerciseIdsFromSets.length > 0
+          ? exerciseIdsFromSets
+          : exerciseIdsFromWorkout
 
       setExerciseSessions(exerciseIds.map(eid => ({
         exerciseId: eid,
@@ -123,16 +129,22 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
     router.push('/dashboard')
   }
 
-  const finishWorkout = useCallback(async () => {
+  const finishWorkout = useCallback(async (force = false) => {
     if (finishing) return
+    const setCount = exerciseSessions.reduce((acc, s) => acc + s.sets.length, 0)
+    if (!force && setCount === 0) {
+      setConfirmEmpty(true)
+      return
+    }
     setFinishing(true)
+    setConfirmEmpty(false)
     const supabase = createClient()
     await supabase
       .from('workouts')
       .update({ finished_at: new Date().toISOString() })
       .eq('id', workoutId)
     router.push('/history')
-  }, [finishing, workoutId, router])
+  }, [finishing, exerciseSessions, workoutId, router])
 
   async function saveAsTemplate() {
     setSavingTemplate(true)
@@ -176,7 +188,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
             >
               <Trash2 className="h-4 w-4" />
             </button>
-            <Button onClick={finishWorkout} disabled={finishing} size="sm" className="gap-1.5">
+            <Button onClick={() => finishWorkout()} disabled={finishing} size="sm" className="gap-1.5">
               <CheckCircle className="h-4 w-4" />
               {finishing ? 'Saving...' : 'Finish'}
             </Button>
@@ -210,6 +222,27 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
               className="rounded-lg bg-red-500/20 border border-red-500/30 px-3 py-1.5 text-xs font-semibold text-red-400 hover:bg-red-500/30 transition-colors"
             >
               Yes, delete
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Empty finish confirmation */}
+      {confirmEmpty && (
+        <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/8 px-4 py-3">
+          <p className="text-sm text-amber-400">No sets logged — finish anyway?<br /><span className="text-xs text-amber-400/60">This workout will be deleted.</span></p>
+          <div className="flex gap-2 shrink-0 ml-3">
+            <button
+              onClick={() => setConfirmEmpty(false)}
+              className="rounded-lg px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              Keep going
+            </button>
+            <button
+              onClick={cancelWorkout}
+              className="rounded-lg bg-amber-500/20 border border-amber-500/30 px-3 py-1.5 text-xs font-semibold text-amber-400 hover:bg-amber-500/30 transition-colors"
+            >
+              Delete it
             </button>
           </div>
         </div>

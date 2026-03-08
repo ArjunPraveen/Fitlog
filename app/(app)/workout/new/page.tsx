@@ -67,6 +67,7 @@ function NewWorkoutContent() {
       .insert({
         user_id: user.id,
         name: workoutName || autoName(),
+        exercise_ids: selectedExercises,
         started_at: new Date().toISOString(),
       })
       .select('id')

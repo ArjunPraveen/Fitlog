@@ -13,7 +13,7 @@ function fmt(ms: number) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export function WorkoutStopwatch({ startedAt, onAutoFinish }: { startedAt: string; onAutoFinish: () => void }) {
+export function WorkoutStopwatch({ startedAt, onAutoFinish }: { startedAt: string; onAutoFinish: (force?: boolean) => void }) {
   const [elapsed, setElapsed] = useState(() => Date.now() - new Date(startedAt).getTime())
   const finish = useCallback(onAutoFinish, [])
 
@@ -23,7 +23,7 @@ export function WorkoutStopwatch({ startedAt, onAutoFinish }: { startedAt: strin
       setElapsed(ms)
       if (ms >= MAX_MS) {
         clearInterval(interval)
-        finish()
+        finish(true)
       }
     }, 1000)
     return () => clearInterval(interval)
