@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { getExerciseById } from '@/lib/exercises'
 import { computeMuscleRecovery, buildSuggestion } from '@/lib/suggestions'
 import { MuscleRecoveryBar } from '@/components/MuscleRecoveryBar'
 import { DashboardCards } from '@/components/DashboardCards'
@@ -20,7 +21,8 @@ export default async function DashboardPage() {
       .select('logged_at, exercise_id, workouts!inner(user_id)')
       .eq('workouts.user_id', user!.id)
       .gte('logged_at', since)
-      .order('logged_at', { ascending: false }),
+      .order('logged_at', { ascending: false })
+      .limit(150),
     supabase
       .from('workouts')
       .select('id, name, started_at')
@@ -38,7 +40,6 @@ export default async function DashboardPage() {
       .limit(3),
   ])
 
-  const { getExerciseById } = await import('@/lib/exercises')
   const setsForRecovery = (recentSets ?? []).map((s: any) => ({
     exercise_primary_muscle: (getExerciseById(s.exercise_id)?.primary_muscle ?? 'core') as MuscleGroup,
     logged_at: s.logged_at,

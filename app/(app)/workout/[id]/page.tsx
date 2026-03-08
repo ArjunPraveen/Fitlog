@@ -39,47 +39,45 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
 
-      const { data: w } = await supabase
-        .from('workouts')
-        .select('name, finished_at, started_at')
-        .eq('id', workoutId)
-        .single()
+      // Fetch workout metadata + existing sets in parallel
+      const [{ data: w }, { data: existingSets }] = await Promise.all([
+        supabase.from('workouts').select('name, finished_at, started_at').eq('id', workoutId).single(),
+        supabase.from('workout_sets').select('*').eq('workout_id', workoutId).order('set_number'),
+      ])
+
       setWorkout(w)
       setTemplateName(w?.name ?? '')
-
-      const { data: existingSets } = await supabase
-        .from('workout_sets')
-        .select('*')
-        .eq('workout_id', workoutId)
-        .order('set_number')
 
       const exerciseIdsFromUrl = searchParams.get('exercises')?.split(',').filter(Boolean) ?? []
       const exerciseIdsFromSets = [...new Set((existingSets ?? []).map((s: WorkoutSet) => s.exercise_id))]
       const exerciseIds = exerciseIdsFromUrl.length > 0 ? exerciseIdsFromUrl : exerciseIdsFromSets
 
-      const sessions: ExerciseSession[] = exerciseIds.map(eid => ({
+      setExerciseSessions(exerciseIds.map(eid => ({
         exerciseId: eid,
         sets: (existingSets ?? [])
           .filter((s: WorkoutSet) => s.exercise_id === eid)
           .map((s: WorkoutSet) => ({ id: s.id, set_number: s.set_number, reps: s.reps, weight_kg: s.weight_kg })),
-      }))
-      setExerciseSessions(sessions)
+      })))
 
-      const { data: historicalSets } = await supabase
-        .from('workout_sets')
-        .select('*')
-        .in('exercise_id', exerciseIds)
-        .neq('workout_id', workoutId)
-        .order('logged_at', { ascending: false })
-        .limit(200)
-
-      const hints = computeProgressiveOverload(historicalSets ?? [], exerciseIds)
-      const hintMessages: Record<string, string> = {}
-      for (const [eid, hint] of Object.entries(hints)) {
-        hintMessages[eid] = hint.note
-      }
-      setOverloadHints(hintMessages)
+      // Show the page immediately — don't wait for overload hints
       setLoading(false)
+
+      // Load overload hints in the background (non-blocking)
+      if (exerciseIds.length > 0) {
+        supabase
+          .from('workout_sets')
+          .select('exercise_id, set_number, reps, weight_kg, logged_at, workout_id')
+          .in('exercise_id', exerciseIds)
+          .neq('workout_id', workoutId)
+          .order('logged_at', { ascending: false })
+          .limit(60)
+          .then(({ data: historicalSets }) => {
+            const hints = computeProgressiveOverload(historicalSets ?? [], exerciseIds)
+            const msgs: Record<string, string> = {}
+            for (const [eid, hint] of Object.entries(hints)) msgs[eid] = hint.note
+            setOverloadHints(msgs)
+          })
+      }
     }
     load()
   }, [workoutId, searchParams])
