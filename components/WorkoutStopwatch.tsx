@@ -1,9 +1,8 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { Timer } from 'lucide-react'
 
-const MAX_MS = 2.5 * 60 * 60 * 1000 // 150 minutes
+const MAX_MS = 2.5 * 60 * 60 * 1000
 
 function fmt(ms: number) {
   const totalSecs = Math.floor(ms / 1000)
@@ -33,20 +32,20 @@ export function WorkoutStopwatch({ startedAt, onAutoFinish }: { startedAt: strin
   const warning = elapsed > MAX_MS * 0.8
 
   return (
-    <div className={`flex flex-col items-center justify-center rounded-2xl border py-8 gap-2 ${
-      warning ? 'bg-amber-500/8 border-amber-500/25' : 'bg-white/3 border-white/8'
+    <div className={`flex flex-col items-center justify-center rounded-2xl py-10 gap-1 border ${
+      warning ? 'bg-amber-500/6 border-amber-500/20' : 'bg-white/3 border-white/8'
     }`}>
-      <div className="flex items-center gap-2">
-        <Timer className={`h-5 w-5 ${warning ? 'text-amber-400' : 'text-muted-foreground'}`} />
-        <span className="text-xs tracking-widest uppercase text-muted-foreground">
-          {warning ? 'Ending soon' : 'Workout time'}
-        </span>
-      </div>
-      <span className={`font-mono text-6xl font-bold tabular-nums tracking-tight ${
+      <span className="text-[11px] tracking-[0.2em] uppercase text-muted-foreground font-sans">
+        {warning ? 'Ending Soon' : 'Workout Time'}
+      </span>
+      <span className={`font-display text-8xl font-black tabular-nums leading-none tracking-tight ${
         warning ? 'text-amber-400' : 'text-foreground'
       }`}>
         {fmt(elapsed)}
       </span>
+      {warning && (
+        <span className="text-xs text-amber-400/60 mt-1 font-sans">auto-finishing in {Math.ceil((MAX_MS - elapsed) / 60000)}m</span>
+      )}
     </div>
   )
 }

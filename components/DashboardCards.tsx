@@ -9,7 +9,7 @@ const CARDS = [
     href: '/workout/new?mode=suggested',
     icon: Shuffle,
     title: 'Suggested',
-    desc: 'Based on your recovery',
+    desc: 'Based on recovery',
     accent: true,
   },
   {
@@ -58,18 +58,18 @@ export function DashboardCards() {
                 className={`relative flex h-full flex-col gap-3 rounded-2xl border p-4 cursor-pointer overflow-hidden
                   ${accent
                     ? 'bg-gold border-transparent glow-gold'
-                    : 'card-luxury border-white/8 hover:border-white/15'
+                    : 'card-luxury border-white/8 hover:border-white/20'
                   }`}
               >
                 {accent && (
-                  <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-white/15 to-transparent pointer-events-none" />
                 )}
-                <Icon className={`h-5 w-5 relative z-10 ${accent ? 'text-[oklch(0.11_0.008_285)]' : 'text-primary'}`} />
+                <Icon className={`h-5 w-5 relative z-10 ${accent ? 'text-[oklch(0.07_0_0)]' : 'text-primary'}`} />
                 <div className="relative z-10">
-                  <p className={`font-semibold text-sm leading-tight ${accent ? 'text-[oklch(0.11_0.008_285)]' : 'text-foreground'}`}>
+                  <p className={`font-semibold text-sm leading-tight ${accent ? 'text-[oklch(0.07_0_0)]' : 'text-foreground'}`}>
                     {title}
                   </p>
-                  <p className={`text-[11px] mt-0.5 leading-tight ${accent ? 'text-[oklch(0.11_0.008_285)]/70' : 'text-muted-foreground'}`}>
+                  <p className={`text-[11px] mt-0.5 leading-tight ${accent ? 'text-[oklch(0.07_0_0)]/70' : 'text-muted-foreground'}`}>
                     {desc}
                   </p>
                 </div>

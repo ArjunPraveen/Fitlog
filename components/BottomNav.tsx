@@ -17,7 +17,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 flex justify-center pb-[env(safe-area-inset-bottom)]">
-      <div className="mx-4 mb-4 flex items-center gap-1 rounded-2xl border border-white/10 bg-[oklch(0.16_0.01_280/0.85)] px-2 py-2 shadow-2xl backdrop-blur-xl">
+      <div className="mx-4 mb-4 flex items-center gap-1 rounded-2xl border border-white/10 bg-[#111111ee] px-2 py-2 shadow-2xl backdrop-blur-xl">
         {NAV_ITEMS.map(({ href, icon: Icon, label }) => {
           const baseHref = href.split('?')[0]
           const isActive =
@@ -44,12 +44,12 @@ export function BottomNav() {
               >
                 <Icon
                   className={`h-5 w-5 transition-colors ${
-                    isActive ? 'text-[oklch(0.11_0.008_285)]' : 'text-muted-foreground'
+                    isActive ? 'text-[oklch(0.07_0_0)]' : 'text-muted-foreground'
                   }`}
                 />
                 <span
                   className={`text-[10px] font-medium transition-colors ${
-                    isActive ? 'text-[oklch(0.11_0.008_285)]' : 'text-muted-foreground'
+                    isActive ? 'text-[oklch(0.07_0_0)]' : 'text-muted-foreground'
                   }`}
                 >
                   {label}

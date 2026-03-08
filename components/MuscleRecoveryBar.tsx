@@ -39,7 +39,7 @@ export function MuscleRecoveryBar({ recovery }: MuscleRecoveryBarProps) {
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: i * 0.06 + 0.3, type: 'spring', stiffness: 400 }}
-                    className="rounded-full bg-gold px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[oklch(0.11_0.008_285)]"
+                    className="rounded-sm bg-primary px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wider text-[oklch(0.07_0_0)]"
                   >
                     Ready
                   </motion.span>
@@ -59,8 +59,8 @@ export function MuscleRecoveryBar({ recovery }: MuscleRecoveryBarProps) {
                 animate={{ width: `${pct}%` }}
                 transition={{ delay: i * 0.06 + 0.1, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className={`h-full rounded-full ${isReady
-                  ? 'bg-gradient-to-r from-[oklch(0.88_0.14_82)] to-[oklch(0.78_0.13_72)]'
-                  : 'bg-gradient-to-r from-[oklch(0.45_0.08_200)] to-[oklch(0.38_0.07_220)]'
+                  ? 'bg-gradient-to-r from-[oklch(0.88_0.26_130)] to-[oklch(0.78_0.23_130)]'
+                  : 'bg-gradient-to-r from-[oklch(0.35_0_0)] to-[oklch(0.28_0_0)]'
                 }`}
               />
             </div>

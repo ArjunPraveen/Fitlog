@@ -19,6 +19,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 | 8 | **Stopwatch + history by day + template from history + dashboard recents** — live 2.5h auto-finishing stopwatch; history grouped by day with in-progress workouts surfaced; save-as-template on each history card; last 3 workouts on dashboard; DB migration: `exercise_ids` `UUID[]` → `TEXT[]` |
 | 9 | **Stopwatch UI + button fix** — stopwatch enlarged to 6xl centred display; fixed base-ui `nativeButton` warning on Resume button in dashboard |
 | 10 | **Cancel workout** — trash icon in active workout header triggers an inline confirmation banner; confirms before deleting the workout and returning to dashboard |
+| 11 | **Athletic Dark redesign** — replaced Elegant Luxury theme with Athletic Dark: pure black bg, electric lime accent (`oklch(0.88 0.26 130)`), `Barlow Condensed` for display/headings + `DM Sans` for body, lime active states throughout, sharper cards with subtle lime top border, stopwatch uses Barlow Condensed 8xl |
 
 </details>
 
