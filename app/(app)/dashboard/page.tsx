@@ -1,3 +1,5 @@
+export const revalidate = 60
+
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { getExerciseById } from '@/lib/exercises'
 import { computeMuscleRecovery, buildSuggestion } from '@/lib/suggestions'

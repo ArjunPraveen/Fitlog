@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Home, Dumbbell, BarChart2, User } from 'lucide-react'
 
 const NAV_ITEMS = [
@@ -32,13 +32,13 @@ export function BottomNav() {
               className="relative flex flex-col items-center gap-0.5 rounded-xl px-5 py-2 transition-colors"
             >
               {isActive && (
-                <motion.div
+                <m.div
                   layoutId="nav-pill"
                   className="absolute inset-0 rounded-xl bg-gold"
                   transition={{ type: 'spring', stiffness: 380, damping: 30 }}
                 />
               )}
-              <motion.div
+              <m.div
                 whileTap={{ scale: 0.85 }}
                 className="relative z-10 flex flex-col items-center gap-0.5"
               >
@@ -54,7 +54,7 @@ export function BottomNav() {
                 >
                   {label}
                 </span>
-              </motion.div>
+              </m.div>
             </Link>
           )
         })}

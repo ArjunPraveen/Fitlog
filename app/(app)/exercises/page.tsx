@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { EXERCISES, EXERCISES_BY_MUSCLE } from '@/lib/exercises'
 import { PageTransition } from '@/components/PageTransition'
 import { Input } from '@/components/ui/input'
@@ -84,7 +84,7 @@ export default function ExercisesPage() {
         </div>
 
         {/* Exercise list */}
-        <motion.div
+        <m.div
           key={`${filterMuscle}-${search}`}
           variants={container}
           initial="hidden"
@@ -92,9 +92,9 @@ export default function ExercisesPage() {
           className="space-y-2"
         >
           {filtered.map(ex => (
-            <motion.div key={ex.id} variants={item}>
+            <m.div key={ex.id} variants={item}>
               <Link href={`/exercises/${ex.id}`}>
-                <motion.div
+                <m.div
                   whileHover={{ x: 4 }}
                   whileTap={{ scale: 0.98 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 30 }}
@@ -110,14 +110,14 @@ export default function ExercisesPage() {
                     {ex.youtube_url && <Youtube className="h-3.5 w-3.5 text-red-500" />}
                     <ChevronRight className="h-4 w-4" />
                   </div>
-                </motion.div>
+                </m.div>
               </Link>
-            </motion.div>
+            </m.div>
           ))}
           {filtered.length === 0 && (
             <p className="text-sm text-muted-foreground py-8 text-center">No exercises found.</p>
           )}
-        </motion.div>
+        </m.div>
       </div>
     </PageTransition>
   )

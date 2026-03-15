@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Flame, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
 
@@ -32,14 +32,14 @@ export function StreakTracker({ currentStreak, bestStreak, weekDots }: StreakTra
         <div className="flex items-center justify-between">
           {/* Current streak */}
           <div className="flex items-center gap-3">
-            <motion.div
+            <m.div
               initial={{ scale: 0.5, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               transition={{ type: 'spring', stiffness: 260, damping: 20 }}
               className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/15"
             >
               <Flame className={`h-5 w-5 ${currentStreak > 0 ? 'text-primary' : 'text-muted-foreground'}`} />
-            </motion.div>
+            </m.div>
             <div>
               <div className="flex items-baseline gap-1.5">
                 <span className="text-2xl font-bold font-display text-gold">{currentStreak}</span>
@@ -56,7 +56,7 @@ export function StreakTracker({ currentStreak, bestStreak, weekDots }: StreakTra
             <div className="flex items-center gap-1.5">
               {dots.map((active, i) => (
                 <div key={i} className="flex flex-col items-center gap-1">
-                  <motion.div
+                  <m.div
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
                     transition={{ delay: i * 0.05, type: 'spring', stiffness: 300, damping: 20 }}

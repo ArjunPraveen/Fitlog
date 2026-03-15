@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
+import { MotionProvider } from '@/components/MotionProvider'
 import { createClient } from '@/lib/supabase'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,12 +28,13 @@ export default function SignupPage() {
   }
 
   return (
+    <MotionProvider>
     <div className="flex min-h-screen flex-col items-center justify-center px-6 bg-background">
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
         <div className="absolute -top-60 left-1/2 h-[600px] w-[600px] -translate-x-1/2 rounded-full bg-primary/6 blur-[140px]" />
       </div>
 
-      <motion.div
+      <m.div
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
@@ -50,13 +52,13 @@ export default function SignupPage() {
 
         <form onSubmit={handleSignup} className="space-y-4">
           {error && (
-            <motion.p
+            <m.p
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               className="rounded-xl bg-destructive/15 px-4 py-3 text-sm text-destructive"
             >
               {error}
-            </motion.p>
+            </m.p>
           )}
 
           {[
@@ -79,14 +81,14 @@ export default function SignupPage() {
             </div>
           ))}
 
-          <motion.button
+          <m.button
             whileTap={{ scale: 0.98 }}
             type="submit"
             disabled={loading}
             className="mt-2 w-full rounded-xl bg-gold py-4 font-display text-base font-bold tracking-wide text-[oklch(0.07_0_0)] glow-gold transition-opacity disabled:opacity-60"
           >
             {loading ? 'Creating account...' : 'CREATE ACCOUNT'}
-          </motion.button>
+          </m.button>
         </form>
 
         <p className="mt-6 text-center text-sm text-muted-foreground">
@@ -95,7 +97,8 @@ export default function SignupPage() {
             Sign in
           </Link>
         </p>
-      </motion.div>
+      </m.div>
     </div>
+    </MotionProvider>
   )
 }

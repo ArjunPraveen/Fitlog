@@ -11,6 +11,7 @@ import type { LoggedSet } from '@/components/SetLogger'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Youtube, BookmarkPlus, Check, Trash2 } from 'lucide-react'
 import type { WorkoutSet } from '@/types'
+import { revalidateDashboard } from '@/lib/actions'
 
 interface ExerciseSession {
   exerciseId: string
@@ -126,6 +127,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   async function cancelWorkout() {
     const supabase = createClient()
     await supabase.from('workouts').delete().eq('id', workoutId)
+    await revalidateDashboard()
     router.push('/dashboard')
   }
 
@@ -143,6 +145,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
       .from('workouts')
       .update({ finished_at: new Date().toISOString() })
       .eq('id', workoutId)
+    await revalidateDashboard()
     router.push('/history')
   }, [finishing, exerciseSessions, workoutId, router])
 

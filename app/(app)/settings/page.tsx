@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -18,7 +18,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
         checked ? 'bg-gradient-to-r from-[oklch(0.88_0.14_82)] to-[oklch(0.78_0.13_72)]' : 'bg-white/10'
       }`}
     >
-      <motion.span
+      <m.span
         layout
         transition={{ type: 'spring', stiffness: 500, damping: 35 }}
         className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow-md ${checked ? 'left-6' : 'left-1'}`}
@@ -146,7 +146,7 @@ export default function SettingsPage() {
           <p className="text-xs text-muted-foreground text-center">{daysPerWeek} days per week</p>
         </Section>
 
-        <motion.div whileTap={{ scale: 0.98 }}>
+        <m.div whileTap={{ scale: 0.98 }}>
           <button
             onClick={handleSave}
             disabled={saving}
@@ -154,7 +154,7 @@ export default function SettingsPage() {
           >
             <AnimatePresence mode="wait" initial={false}>
               {saved ? (
-                <motion.span
+                <m.span
                   key="saved"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -162,20 +162,20 @@ export default function SettingsPage() {
                   className="flex items-center justify-center gap-2"
                 >
                   <CheckCircle className="h-4 w-4" /> Saved!
-                </motion.span>
+                </m.span>
               ) : (
-                <motion.span
+                <m.span
                   key="save"
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -6 }}
                 >
                   {saving ? 'Saving...' : 'Save Changes'}
-                </motion.span>
+                </m.span>
               )}
             </AnimatePresence>
           </button>
-        </motion.div>
+        </m.div>
       </div>
     </PageTransition>
   )

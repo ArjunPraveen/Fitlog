@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Dumbbell, LayoutTemplate, Shuffle } from 'lucide-react'
 
 const CARDS = [
@@ -42,16 +42,16 @@ export function DashboardCards() {
   return (
     <div className="pt-2">
       <h2 className="text-xs tracking-widest uppercase text-muted-foreground mb-4">Start a Workout</h2>
-      <motion.div
+      <m.div
         variants={container}
         initial="hidden"
         animate="show"
         className="grid grid-cols-3 gap-4"
       >
         {CARDS.map(({ href, icon: Icon, title, desc, accent }) => (
-          <motion.div key={href} variants={card} className="min-w-0 flex">
+          <m.div key={href} variants={card} className="min-w-0 flex">
             <Link href={href} className="flex flex-1">
-              <motion.div
+              <m.div
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
@@ -73,11 +73,11 @@ export function DashboardCards() {
                     {desc}
                   </p>
                 </div>
-              </motion.div>
+              </m.div>
             </Link>
-          </motion.div>
+          </m.div>
         ))}
-      </motion.div>
+      </m.div>
     </div>
   )
 }

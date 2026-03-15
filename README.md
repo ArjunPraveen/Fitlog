@@ -11,6 +11,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
+| 19 | 2026-03-15 | **Performance optimizations** — dashboard caching (`revalidate=60`) with `revalidatePath` on workout mutations; CSS PageTransition replacing framer-motion wrapper; dynamic import for Recharts (~70KB lazy-loaded); LazyMotion provider for framer-motion tree-shaking; layout auth switched from `getUser()` to `getSession()`; progress query capped at 200 rows |
 | 18 | 2026-03-15 | **Streak tracking + exercise library expansion + workout import** — added streak tracker on dashboard (current streak, best streak, 7-day dot row linking to history); expanded exercise library from 28 → 150 exercises; bulk-imported workout history from CSV export (109 sessions, 2103 sets) |
 | 17 | 2026-03-09 | **YouTube icon + green hierarchy** — replaced `ExternalLink` with `Youtube` icon (red) on exercise cards, detail page, and list; reserved bright lime for primary CTAs only; icon containers and muscle tags changed to neutral white/grey |
 | 16 | 2026-03-09 | **Fix resume session missing exercises** — exercises now stored on the `workouts` row (`exercise_ids TEXT[]`); resume always shows correct exercises even before any sets are logged. DB migration required: `ALTER TABLE public.workouts ADD COLUMN IF NOT EXISTS exercise_ids TEXT[] DEFAULT '{}';` |
@@ -83,7 +84,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 - [ ] Reduce muscle tag pill size
 - [ ] Increase card padding to ~20px for cleaner spacing
 - [ ] **Funny gym pun validation messages** — replace generic errors with gym humour
-- [ ] **Client-side caching** — React Query / SWR for instant back-navigation
+- [x] **Server-side caching** — `revalidate=60` on dashboard with `revalidatePath` on mutations for instant back-navigation
 
 ---
 
@@ -176,10 +177,13 @@ components/
   DashboardCards.tsx       # Animated start-workout cards (suggested / template / scratch)
   StreakTracker.tsx         # Workout streak display with 7-day dot row (links to history)
   MuscleRecoveryBar.tsx    # Animated recovery bars per muscle group
+  ProgressChart.tsx        # Lazy-loaded Recharts line chart (dynamic import)
+  MotionProvider.tsx       # LazyMotion wrapper for framer-motion tree-shaking
   SetLogger.tsx            # Inline set/rep/weight logger used in active workout
   PageTransition.tsx       # Framer Motion fade+slide wrapper for all pages
 
 lib/
+  actions.ts               # Server actions (revalidatePath for dashboard/history cache busting)
   exercises.ts             # Hardcoded exercise library (150 exercises, 6 muscle groups)
   suggestions.ts           # Muscle recovery score computation + suggestion builder
   progressive-overload.ts  # Per-exercise weight hint based on last 3 sessions

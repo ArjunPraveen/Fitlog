@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { EXERCISES, EXERCISES_BY_MUSCLE, getExerciseById } from '@/lib/exercises'
 import type { MuscleGroup } from '@/types'
+import { revalidateDashboard } from '@/lib/actions'
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core']
 
@@ -78,6 +79,7 @@ function NewWorkoutContent() {
       return
     }
 
+    await revalidateDashboard()
     router.push(`/workout/${workout.id}?exercises=${selectedExercises.join(',')}`)
   }
 
