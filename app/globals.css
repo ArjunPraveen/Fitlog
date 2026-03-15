@@ -126,6 +126,9 @@
     padding-bottom: calc(4.5rem + env(safe-area-inset-bottom));
   }
 
+  /* Hide scrollbar for horizontal scroll areas */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+
   /* Page enter animation (replaces framer-motion PageTransition) */
   .page-transition {
     animation: page-enter 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
@@ -135,4 +138,9 @@
 @keyframes page-enter {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes flame-pulse {
+  0%, 100% { box-shadow: 0 0 40px oklch(0.88 0.26 130 / 25%), 0 0 80px oklch(0.88 0.26 130 / 10%); }
+  50% { box-shadow: 0 0 50px oklch(0.88 0.26 130 / 35%), 0 0 100px oklch(0.88 0.26 130 / 15%); }
 }

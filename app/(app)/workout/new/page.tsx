@@ -3,13 +3,14 @@
 import { useSearchParams, useRouter } from 'next/navigation'
 import { useEffect, useState, Suspense } from 'react'
 import { createClient } from '@/lib/supabase'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import { Search } from 'lucide-react'
 import { EXERCISES, EXERCISES_BY_MUSCLE, getExerciseById } from '@/lib/exercises'
 import type { MuscleGroup } from '@/types'
 import { revalidateDashboard } from '@/lib/actions'
+import { computeMuscleRecovery, buildSmartSuggestion, type SmartSuggestion } from '@/lib/suggestions'
+import { Dumbbell, Flame } from 'lucide-react'
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core']
 
@@ -18,11 +19,14 @@ function NewWorkoutContent() {
   const router = useRouter()
   const mode = searchParams.get('mode') ?? 'scratch'
 
-  const [workoutName, setWorkoutName] = useState('')
+  const [search, setSearch] = useState('')
   const [selectedExercises, setSelectedExercises] = useState<string[]>([])
   const [filterMuscle, setFilterMuscle] = useState<MuscleGroup | 'all'>('all')
   const [loading, setLoading] = useState(false)
   const [templates, setTemplates] = useState<{ id: string; name: string; exercise_ids: string[] }[]>([])
+  const [suggestion, setSuggestion] = useState<SmartSuggestion | null>(null)
+  const [suggestionLoading, setSuggestionLoading] = useState(mode === 'suggested')
+  const [showSuggestionCard, setShowSuggestionCard] = useState(true)
 
   useEffect(() => {
     if (mode === 'template') {
@@ -38,8 +42,64 @@ function NewWorkoutContent() {
     }
   }, [mode])
 
-  const filteredExercises =
-    filterMuscle === 'all' ? EXERCISES : EXERCISES_BY_MUSCLE[filterMuscle]
+  useEffect(() => {
+    if (mode !== 'suggested') return
+    const supabase = createClient()
+
+    async function loadSuggestion() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) { setSuggestionLoading(false); return }
+
+      const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
+      const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
+
+      // Fetch recent sets for recovery + exercise history in parallel
+      const [recoveryResult, historyResult] = await Promise.all([
+        supabase
+          .from('workout_sets')
+          .select('exercise_id, logged_at')
+          .eq('user_id', user.id)
+          .gte('logged_at', fourteenDaysAgo),
+        supabase
+          .from('workout_sets')
+          .select('exercise_id')
+          .eq('user_id', user.id)
+          .gte('logged_at', ninetyDaysAgo),
+      ])
+
+      // Build recovery from recent sets — need exercise_primary_muscle
+      const recentSets = (recoveryResult.data ?? []).map(s => ({
+        exercise_primary_muscle: getExerciseById(s.exercise_id)?.primary_muscle as MuscleGroup,
+        logged_at: s.logged_at,
+      })).filter(s => s.exercise_primary_muscle)
+
+      const recovery = computeMuscleRecovery(recentSets)
+
+      // Build per-muscle exercise history (ordered by frequency)
+      const freqMap: Record<string, number> = {}
+      for (const row of historyResult.data ?? []) {
+        freqMap[row.exercise_id] = (freqMap[row.exercise_id] || 0) + 1
+      }
+      const userExerciseHistory: Partial<Record<MuscleGroup, string[]>> = {}
+      const sortedExIds = Object.entries(freqMap).sort((a, b) => b[1] - a[1]).map(([id]) => id)
+      for (const exId of sortedExIds) {
+        const ex = getExerciseById(exId)
+        if (!ex) continue
+        const m = ex.primary_muscle
+        if (!userExerciseHistory[m]) userExerciseHistory[m] = []
+        userExerciseHistory[m]!.push(exId)
+      }
+
+      const result = buildSmartSuggestion(recovery, userExerciseHistory)
+      setSuggestion(result)
+      setSuggestionLoading(false)
+    }
+
+    loadSuggestion()
+  }, [mode])
+
+  const filteredExercises = (filterMuscle === 'all' ? EXERCISES : EXERCISES_BY_MUSCLE[filterMuscle])
+    .filter(ex => !search || ex.name.toLowerCase().includes(search.toLowerCase()))
 
   function toggleExercise(id: string) {
     setSelectedExercises(prev =>
@@ -56,19 +116,27 @@ function NewWorkoutContent() {
     return `${labelled.slice(0, -1).join(', ')} & ${labelled[labelled.length - 1]} Day`
   }
 
-  async function startWorkout() {
-    if (selectedExercises.length === 0) return
+  async function startWorkoutWithExercises(exerciseIds: string[]) {
+    if (exerciseIds.length === 0) return
     setLoading(true)
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
 
+    // Build auto-name from the exercise IDs
+    const muscles = [...new Set(exerciseIds.map(id => getExerciseById(id)?.primary_muscle).filter(Boolean))] as string[]
+    const labelled = muscles.map(m => m.charAt(0).toUpperCase() + m.slice(1))
+    let name: string | null = null
+    if (labelled.length === 1) name = `${labelled[0]} Day`
+    else if (labelled.length === 2) name = `${labelled[0]} & ${labelled[1]} Day`
+    else if (labelled.length > 2) name = `${labelled.slice(0, -1).join(', ')} & ${labelled[labelled.length - 1]} Day`
+
     const { data: workout, error } = await supabase
       .from('workouts')
       .insert({
         user_id: user.id,
-        name: workoutName || autoName(),
-        exercise_ids: selectedExercises,
+        name,
+        exercise_ids: exerciseIds,
         started_at: new Date().toISOString(),
       })
       .select('id')
@@ -80,11 +148,14 @@ function NewWorkoutContent() {
     }
 
     await revalidateDashboard()
-    router.push(`/workout/${workout.id}?exercises=${selectedExercises.join(',')}`)
+    router.push(`/workout/${workout.id}?exercises=${exerciseIds.join(',')}`)
+  }
+
+  async function startWorkout() {
+    await startWorkoutWithExercises(selectedExercises)
   }
 
   function loadTemplate(template: { id: string; name: string; exercise_ids: string[] }) {
-    setWorkoutName(template.name)
     setSelectedExercises(template.exercise_ids)
   }
 
@@ -99,11 +170,81 @@ function NewWorkoutContent() {
         </p>
       </div>
 
-      <div>
-        <Input
-          placeholder="Workout name (optional, e.g. Push Day)"
-          value={workoutName}
-          onChange={e => setWorkoutName(e.target.value)}
+      {/* Smart Suggestion Card */}
+      {mode === 'suggested' && showSuggestionCard && (
+        <>
+          {suggestionLoading ? (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center">
+              <div className="animate-pulse space-y-3">
+                <div className="h-4 w-40 mx-auto rounded bg-white/10" />
+                <div className="h-3 w-56 mx-auto rounded bg-white/10" />
+              </div>
+            </div>
+          ) : suggestion ? (
+            <div className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/[0.06] to-transparent p-5 space-y-4">
+              <div className="flex items-center gap-2">
+                <Flame className="h-5 w-5 text-primary" />
+                <h2 className="font-bold text-base">Today&apos;s Suggestion</h2>
+              </div>
+
+              <p className="text-sm text-muted-foreground">
+                {suggestion.muscles.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(' & ')} &middot; {suggestion.exercises.length} exercises
+              </p>
+
+              {suggestion.muscles.map(muscle => (
+                <div key={muscle} className="space-y-1">
+                  <p className="text-[11px] tracking-widest uppercase text-muted-foreground">{muscle}</p>
+                  <p className="text-sm text-foreground/90">
+                    {suggestion.exercises
+                      .filter(ex => ex.primary_muscle === muscle)
+                      .map(ex => ex.name)
+                      .join(', ')}
+                  </p>
+                </div>
+              ))}
+
+              <div className="flex gap-3 pt-1">
+                <button
+                  onClick={async () => {
+                    setSelectedExercises(suggestion.exercises.map(ex => ex.id))
+                    await startWorkoutWithExercises(suggestion.exercises.map(ex => ex.id))
+                  }}
+                  disabled={loading}
+                  className="flex-1 rounded-xl bg-gold py-3 text-sm font-semibold text-[oklch(0.11_0.008_285)] glow-gold transition-opacity disabled:opacity-40"
+                >
+                  {loading ? 'Starting...' : 'Start Now'}
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedExercises(suggestion.exercises.map(ex => ex.id))
+                    setShowSuggestionCard(false)
+                  }}
+                  className="flex-1 rounded-xl border border-white/15 py-3 text-sm font-medium hover:bg-white/5 transition-colors"
+                >
+                  Customize
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center space-y-2">
+              <Dumbbell className="h-6 w-6 mx-auto text-muted-foreground" />
+              <p className="font-semibold text-sm">All muscles are recovering</p>
+              <p className="text-xs text-muted-foreground">Take a rest day or pick exercises manually below.</p>
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Normal picker UI — hidden when suggestion card is active */}
+      {!(mode === 'suggested' && showSuggestionCard && (suggestionLoading || suggestion)) && (
+      <>
+      <div className="relative">
+        <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <input
+          placeholder="Search exercises..."
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          className="w-full rounded-xl border border-white/10 bg-white/5 pl-10 pr-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary/50 focus:outline-none"
         />
       </div>
 
@@ -198,6 +339,8 @@ function NewWorkoutContent() {
               : 'Select exercises to begin'}
         </button>
       </div>
+      </>
+      )}
     </div>
   )
 }

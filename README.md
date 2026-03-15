@@ -11,6 +11,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
+| 20 | 2026-03-15 | **Smart suggested workouts** — `buildSmartSuggestion()` picks 2 most recovered muscles and 4 exercises each (prioritizing user's history); suggestion card on `/workout/new?mode=suggested` with Start Now (instant workout) and Customize (pre-selected picker); rest day message when all muscles are recovering |
 | 19 | 2026-03-15 | **Performance optimizations** — dashboard caching (`revalidate=60`) with `revalidatePath` on workout mutations; CSS PageTransition replacing framer-motion wrapper; dynamic import for Recharts (~70KB lazy-loaded); LazyMotion provider for framer-motion tree-shaking; layout auth switched from `getUser()` to `getSession()`; progress query capped at 200 rows |
 | 18 | 2026-03-15 | **Streak tracking + exercise library expansion + workout import** — added streak tracker on dashboard (current streak, best streak, 7-day dot row linking to history); expanded exercise library from 28 → 150 exercises; bulk-imported workout history from CSV export (109 sessions, 2103 sets) |
 | 17 | 2026-03-09 | **YouTube icon + green hierarchy** — replaced `ExternalLink` with `Youtube` icon (red) on exercise cards, detail page, and list; reserved bright lime for primary CTAs only; icon containers and muscle tags changed to neutral white/grey |
@@ -57,8 +58,8 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 - [ ] Color-coded recovery bars (green / yellow / red) based on fatigue level
 - [ ] Show suggested workout on the Suggested card (e.g. "Chest + Back")
 - [x] Add workout streak tracking on the home screen
-- [ ] Auto-generate workout suggestions based on schedule and recovery
-- [ ] **Revamp Suggested workouts** — smarter recovery-based suggestions
+- [x] Auto-generate workout suggestions based on schedule and recovery
+- [x] **Revamp Suggested workouts** — smarter recovery-based suggestions with accept/customize flow
 
 ### Progress & Stats
 - [ ] Show workout volume stats (total sets, tonnage) in Progress

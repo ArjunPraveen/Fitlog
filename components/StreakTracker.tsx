@@ -27,7 +27,7 @@ export function StreakTracker({ currentStreak, bestStreak, weekDots }: StreakTra
   const dots = [...weekDots].reverse()
 
   return (
-    <Link href="/history">
+    <Link href="/streak">
       <div className="rounded-2xl border border-white/8 card-luxury p-4 cursor-pointer hover:border-white/15 transition-colors">
         <div className="flex items-center justify-between">
           {/* Current streak */}
