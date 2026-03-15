@@ -11,6 +11,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
+| 18 | 2026-03-15 | **Streak tracking + exercise library expansion + workout import** — added streak tracker on dashboard (current streak, best streak, 7-day dot row linking to history); expanded exercise library from 28 → 150 exercises; bulk-imported workout history from CSV export (109 sessions, 2103 sets) |
 | 17 | 2026-03-09 | **YouTube icon + green hierarchy** — replaced `ExternalLink` with `Youtube` icon (red) on exercise cards, detail page, and list; reserved bright lime for primary CTAs only; icon containers and muscle tags changed to neutral white/grey |
 | 16 | 2026-03-09 | **Fix resume session missing exercises** — exercises now stored on the `workouts` row (`exercise_ids TEXT[]`); resume always shows correct exercises even before any sets are logged. DB migration required: `ALTER TABLE public.workouts ADD COLUMN IF NOT EXISTS exercise_ids TEXT[] DEFAULT '{}';` |
 | 15 | 2026-03-09 | **Time-based greeting + empty workout guard** — dashboard greeting changes based on time of day (morning/afternoon/evening); finishing a workout with 0 sets shows an amber confirmation asking if it was intentional, offering to delete the session |
@@ -54,7 +55,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 - [ ] Replace "READY" label with actual recovery percentage
 - [ ] Color-coded recovery bars (green / yellow / red) based on fatigue level
 - [ ] Show suggested workout on the Suggested card (e.g. "Chest + Back")
-- [ ] Add workout streak tracking on the home screen
+- [x] Add workout streak tracking on the home screen
 - [ ] Auto-generate workout suggestions based on schedule and recovery
 - [ ] **Revamp Suggested workouts** — smarter recovery-based suggestions
 
@@ -67,7 +68,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 - [ ] **Revamp Progress page** — richer charts, friends' workout details in Progress tab
 
 ### Exercise Library
-- [ ] Add more exercises — expand beyond 28, more variations and muscle groups
+- [x] Add more exercises — expanded from 28 → 150 exercises across all muscle groups
 - [ ] Add exercise metadata (muscle group, equipment) visible in the picker
 - [ ] Improve exercise picker UI — less plain list, more visual
 
@@ -114,7 +115,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 - Three entry points: **Suggested** (recovery-based), **Template** (saved routines), **From Scratch**
 
 ### Exercise Data
-- **Hardcoded in `lib/exercises.ts`** — 28 exercises across 6 muscle groups, no DB query needed
+- **Hardcoded in `lib/exercises.ts`** — 150 exercises across 6 muscle groups, no DB query needed
 - Each exercise has a description, YouTube link, and muscle group tags
 - Easy to add more by editing the file
 
@@ -173,12 +174,13 @@ app/
 components/
   BottomNav.tsx            # Fixed floating pill nav with Framer Motion active indicator
   DashboardCards.tsx       # Animated start-workout cards (suggested / template / scratch)
+  StreakTracker.tsx         # Workout streak display with 7-day dot row (links to history)
   MuscleRecoveryBar.tsx    # Animated recovery bars per muscle group
   SetLogger.tsx            # Inline set/rep/weight logger used in active workout
   PageTransition.tsx       # Framer Motion fade+slide wrapper for all pages
 
 lib/
-  exercises.ts             # Hardcoded exercise library (28 exercises, 6 muscle groups)
+  exercises.ts             # Hardcoded exercise library (150 exercises, 6 muscle groups)
   suggestions.ts           # Muscle recovery score computation + suggestion builder
   progressive-overload.ts  # Per-exercise weight hint based on last 3 sessions
   supabase.ts              # Browser Supabase client
@@ -186,6 +188,9 @@ lib/
 
 types/
   index.ts                 # TypeScript interfaces matching DB schema
+
+scripts/
+  import-workouts.ts       # Bulk import workout data from CSV export into Supabase
 
 supabase-schema.sql        # Full DB schema + RLS policies — run in Supabase SQL Editor
 ```

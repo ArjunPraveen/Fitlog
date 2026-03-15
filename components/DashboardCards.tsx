@@ -40,22 +40,22 @@ const card = {
 
 export function DashboardCards() {
   return (
-    <div>
+    <div className="pt-2">
       <h2 className="text-xs tracking-widest uppercase text-muted-foreground mb-4">Start a Workout</h2>
       <motion.div
         variants={container}
         initial="hidden"
         animate="show"
-        className="grid grid-cols-3 gap-3 items-stretch"
+        className="grid grid-cols-3 gap-4"
       >
         {CARDS.map(({ href, icon: Icon, title, desc, accent }) => (
-          <motion.div key={href} variants={card} className="h-full">
-            <Link href={href} className="block h-full">
+          <motion.div key={href} variants={card} className="min-w-0 flex">
+            <Link href={href} className="flex flex-1">
               <motion.div
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
                 transition={{ type: 'spring', stiffness: 400, damping: 25 }}
-                className={`relative flex h-full flex-col gap-3 rounded-2xl border p-4 cursor-pointer overflow-hidden
+                className={`relative flex flex-1 flex-col justify-between gap-3 rounded-2xl border p-4 cursor-pointer overflow-hidden
                   ${accent
                     ? 'bg-gold border-transparent glow-gold'
                     : 'card-luxury border-white/8 hover:border-white/20'

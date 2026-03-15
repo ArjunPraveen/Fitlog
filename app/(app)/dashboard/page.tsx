@@ -3,6 +3,7 @@ import { getExerciseById } from '@/lib/exercises'
 import { computeMuscleRecovery, buildSuggestion } from '@/lib/suggestions'
 import { MuscleRecoveryBar } from '@/components/MuscleRecoveryBar'
 import { DashboardCards } from '@/components/DashboardCards'
+import { StreakTracker } from '@/components/StreakTracker'
 import { PageTransition } from '@/components/PageTransition'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
@@ -15,7 +16,7 @@ export default async function DashboardPage() {
 
   const since = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString()
 
-  const [{ data: recentSets }, { data: activeWorkout }, { data: recentWorkouts }] = await Promise.all([
+  const [{ data: recentSets }, { data: activeWorkout }, { data: recentWorkouts }, { data: streakWorkouts }] = await Promise.all([
     supabase
       .from('workout_sets')
       .select('logged_at, exercise_id, workouts!inner(user_id)')
@@ -38,6 +39,14 @@ export default async function DashboardPage() {
       .not('finished_at', 'is', null)
       .order('finished_at', { ascending: false })
       .limit(1),
+    // Fetch finished workouts for streak calculation (last 90 days)
+    supabase
+      .from('workouts')
+      .select('finished_at')
+      .eq('user_id', user!.id)
+      .not('finished_at', 'is', null)
+      .gte('finished_at', new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString())
+      .order('finished_at', { ascending: false }),
   ])
 
   const setsForRecovery = (recentSets ?? []).map((s: any) => ({
@@ -51,9 +60,54 @@ export default async function DashboardPage() {
   const hour = new Date().getHours()
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
 
+  // Compute streak from finished workout dates
+  const workoutDates = new Set(
+    (streakWorkouts ?? []).map((w: any) =>
+      new Date(w.finished_at).toLocaleDateString('en-CA') // YYYY-MM-DD
+    )
+  )
+
+  // Current streak: count consecutive days backward from today
+  let currentStreak = 0
+  const checkDate = new Date()
+  // If user hasn't worked out today, start checking from yesterday
+  if (!workoutDates.has(checkDate.toLocaleDateString('en-CA'))) {
+    checkDate.setDate(checkDate.getDate() - 1)
+  }
+  while (workoutDates.has(checkDate.toLocaleDateString('en-CA'))) {
+    currentStreak++
+    checkDate.setDate(checkDate.getDate() - 1)
+  }
+
+  // Best streak within fetched data
+  let bestStreak = 0
+  let tempStreak = 0
+  const sortedDates = [...workoutDates].sort().reverse()
+  for (let i = 0; i < sortedDates.length; i++) {
+    if (i === 0) { tempStreak = 1; continue }
+    const prev = new Date(sortedDates[i - 1])
+    const curr = new Date(sortedDates[i])
+    const diffDays = (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24)
+    if (Math.round(diffDays) === 1) {
+      tempStreak++
+    } else {
+      bestStreak = Math.max(bestStreak, tempStreak)
+      tempStreak = 1
+    }
+  }
+  bestStreak = Math.max(bestStreak, tempStreak, currentStreak)
+
+  // Week dots: last 7 days, most recent first
+  const weekDots: boolean[] = []
+  for (let i = 0; i < 7; i++) {
+    const d = new Date()
+    d.setDate(d.getDate() - i)
+    weekDots.push(workoutDates.has(d.toLocaleDateString('en-CA')))
+  }
+
   return (
     <PageTransition>
-      <div className="space-y-7">
+      <div className="space-y-8">
         <div className="pt-2">
           <p className="text-sm text-muted-foreground mb-1 tracking-widest uppercase">{greeting}</p>
           <h1 className="text-4xl font-bold text-gold leading-tight">{userName}</h1>
@@ -63,6 +117,8 @@ export default async function DashboardPage() {
               : 'Still recovering — rest well today.'}
           </p>
         </div>
+
+        <StreakTracker currentStreak={currentStreak} bestStreak={bestStreak} weekDots={weekDots} />
 
         {activeWorkout && (
           <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-center justify-between">
