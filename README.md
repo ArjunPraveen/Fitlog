@@ -11,6 +11,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
+| 21 | 2026-03-29 | **Add exercises mid-workout** — floating "+" FAB on active workout page opens `ExercisePickerModal` bottom sheet (search, muscle group filters, toggle selection); existing exercises greyed out with "In workout" badge; auto-renames workout from updated muscle groups; loads progressive overload hints for new exercises; auto-scrolls to first new card |
 | 20 | 2026-03-15 | **Smart suggested workouts** — `buildSmartSuggestion()` picks 2 most recovered muscles and 4 exercises each (prioritizing user's history); suggestion card on `/workout/new?mode=suggested` with Start Now (instant workout) and Customize (pre-selected picker); rest day message when all muscles are recovering |
 | 19 | 2026-03-15 | **Performance optimizations** — dashboard caching (`revalidate=60`) with `revalidatePath` on workout mutations; CSS PageTransition replacing framer-motion wrapper; dynamic import for Recharts (~70KB lazy-loaded); LazyMotion provider for framer-motion tree-shaking; layout auth switched from `getUser()` to `getSession()`; progress query capped at 200 rows |
 | 18 | 2026-03-15 | **Streak tracking + exercise library expansion + workout import** — added streak tracker on dashboard (current streak, best streak, 7-day dot row linking to history); expanded exercise library from 28 → 150 exercises; bulk-imported workout history from CSV export (109 sessions, 2103 sets) |
@@ -177,6 +178,7 @@ components/
   BottomNav.tsx            # Fixed floating pill nav with Framer Motion active indicator
   DashboardCards.tsx       # Animated start-workout cards (suggested / template / scratch)
   StreakTracker.tsx         # Workout streak display with 7-day dot row (links to history)
+  ExercisePickerModal.tsx   # Full-screen bottom sheet for adding exercises mid-workout
   MuscleRecoveryBar.tsx    # Animated recovery bars per muscle group
   ProgressChart.tsx        # Lazy-loaded Recharts line chart (dynamic import)
   MotionProvider.tsx       # LazyMotion wrapper for framer-motion tree-shaking
