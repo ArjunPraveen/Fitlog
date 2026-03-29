@@ -9,8 +9,10 @@ import { SetLogger } from '@/components/SetLogger'
 import { WorkoutStopwatch } from '@/components/WorkoutStopwatch'
 import type { LoggedSet } from '@/components/SetLogger'
 import { Button } from '@/components/ui/button'
-import { CheckCircle, Youtube, BookmarkPlus, Check, Trash2 } from 'lucide-react'
+import { CheckCircle, Youtube, BookmarkPlus, Check, Trash2, Plus } from 'lucide-react'
+import { ExercisePickerModal } from '@/components/ExercisePickerModal'
 import type { WorkoutSet } from '@/types'
+import type { MuscleGroup } from '@/types'
 import { revalidateDashboard } from '@/lib/actions'
 
 interface ExerciseSession {
@@ -34,6 +36,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const [templateName, setTemplateName] = useState('')
   const [showTemplateSave, setShowTemplateSave] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
+  const [showExercisePicker, setShowExercisePicker] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -168,6 +171,62 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const isFinished = workout?.finished_at != null
   const totalSets = exerciseSessions.reduce((acc, s) => acc + s.sets.length, 0)
 
+  function deriveWorkoutName(exerciseIds: string[]) {
+    const muscles = [...new Set(exerciseIds.map(id => getExerciseById(id)?.primary_muscle).filter(Boolean))] as string[]
+    const labelled = muscles.map(m => m.charAt(0).toUpperCase() + m.slice(1))
+    if (labelled.length === 0) return null
+    if (labelled.length === 1) return `${labelled[0]} Day`
+    if (labelled.length === 2) return `${labelled[0]} & ${labelled[1]} Day`
+    return `${labelled.slice(0, -1).join(', ')} & ${labelled[labelled.length - 1]} Day`
+  }
+
+  async function handleAddExercises(newExerciseIds: string[]) {
+    if (newExerciseIds.length === 0) return
+
+    // Append new exercises to session state
+    setExerciseSessions(prev => [
+      ...prev,
+      ...newExerciseIds.map(eid => ({ exerciseId: eid, sets: [] as LoggedSet[] })),
+    ])
+
+    // Re-derive workout name from all exercises
+    const allExerciseIds = [...exerciseSessions.map(s => s.exerciseId), ...newExerciseIds]
+    const newName = deriveWorkoutName(allExerciseIds)
+    if (newName && newName !== workout?.name) {
+      setWorkout(prev => prev ? { ...prev, name: newName } : prev)
+      setTemplateName(newName)
+
+      // Update name in DB
+      const supabase = createClient()
+      await supabase
+        .from('workouts')
+        .update({ name: newName, exercise_ids: allExerciseIds })
+        .eq('id', workoutId)
+    }
+
+    // Load overload hints for new exercises in background
+    const supabase = createClient()
+    supabase
+      .from('workout_sets')
+      .select('exercise_id, set_number, reps, weight_kg, logged_at, workout_id')
+      .in('exercise_id', newExerciseIds)
+      .neq('workout_id', workoutId)
+      .order('logged_at', { ascending: false })
+      .limit(60)
+      .then(({ data: historicalSets }) => {
+        const hints = computeProgressiveOverload((historicalSets ?? []) as any[], newExerciseIds)
+        const msgs: Record<string, string> = {}
+        for (const [eid, hint] of Object.entries(hints)) msgs[eid] = hint.note
+        setOverloadHints(prev => ({ ...prev, ...msgs }))
+      })
+
+    // Scroll to the first newly added exercise after a tick
+    setTimeout(() => {
+      const el = document.getElementById(`exercise-${newExerciseIds[0]}`)
+      el?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }, 100)
+  }
+
   if (loading) {
     return <div className="p-4 text-muted-foreground text-sm">Loading workout...</div>
   }
@@ -276,7 +335,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
         const ex = getExerciseById(exerciseId) ?? EXERCISES.find(e => e.id === exerciseId)
         if (!ex) return null
         return (
-          <div key={exerciseId} className="rounded-2xl border border-white/8 card-luxury overflow-hidden">
+          <div key={exerciseId} className="rounded-2xl border border-white/8 card-luxury overflow-hidden" id={`exercise-${exerciseId}`}>
             <div className="px-4 py-3 flex items-start justify-between border-b border-white/6">
               <div>
                 <p className="font-semibold text-sm">{ex.name}</p>
@@ -319,6 +378,27 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </div>
         )
       })}
+
+      {/* Floating Add Exercise button — active workouts only */}
+      {!isFinished && (
+        <div className="fixed bottom-[6.5rem] right-5 z-30">
+          <button
+            onClick={() => setShowExercisePicker(true)}
+            className="flex h-13 w-13 items-center justify-center rounded-2xl border border-primary/25 bg-primary text-primary-foreground shadow-xl glow-gold transition-transform hover:scale-105 active:scale-95"
+            aria-label="Add exercise"
+          >
+            <Plus className="h-6 w-6" strokeWidth={2.5} />
+          </button>
+        </div>
+      )}
+
+      {/* Exercise picker modal */}
+      <ExercisePickerModal
+        open={showExercisePicker}
+        onClose={() => setShowExercisePicker(false)}
+        onAdd={handleAddExercises}
+        existingExerciseIds={exerciseSessions.map(s => s.exerciseId)}
+      />
     </div>
   )
 }
