@@ -11,6 +11,7 @@ import type { LoggedSet } from '@/components/SetLogger'
 import { Button } from '@/components/ui/button'
 import { CheckCircle, Youtube, BookmarkPlus, Check, Trash2, Plus } from 'lucide-react'
 import { ExercisePickerModal } from '@/components/ExercisePickerModal'
+import { AIReviewButton } from '@/components/AIReviewButton'
 import type { WorkoutSet } from '@/types'
 import type { MuscleGroup } from '@/types'
 import { revalidateDashboard } from '@/lib/actions'
@@ -37,6 +38,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const [showTemplateSave, setShowTemplateSave] = useState(false)
   const [templateSaved, setTemplateSaved] = useState(false)
   const [showExercisePicker, setShowExercisePicker] = useState(false)
+  const [historicalSets, setHistoricalSets] = useState<WorkoutSet[]>([])
 
   useEffect(() => {
     async function load() {
@@ -81,8 +83,10 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           .neq('workout_id', workoutId)
           .order('logged_at', { ascending: false })
           .limit(60)
-          .then(({ data: historicalSets }) => {
-            const hints = computeProgressiveOverload((historicalSets ?? []) as any[], exerciseIds)
+          .then(({ data: histSets }) => {
+            const sets = (histSets ?? []) as WorkoutSet[]
+            setHistoricalSets(sets)
+            const hints = computeProgressiveOverload(sets, exerciseIds)
             const msgs: Record<string, string> = {}
             for (const [eid, hint] of Object.entries(hints)) msgs[eid] = hint.note
             setOverloadHints(msgs)
@@ -328,6 +332,17 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
             {savingTemplate ? 'Saving...' : 'Save'}
           </Button>
         </div>
+      )}
+
+      {/* AI Workout Review — completed workouts only */}
+      {isFinished && workout && (
+        <AIReviewButton
+          workoutName={workout.name ?? 'Workout'}
+          startedAt={workout.started_at}
+          finishedAt={workout.finished_at!}
+          exerciseSessions={exerciseSessions}
+          historicalSets={historicalSets}
+        />
       )}
 
       {/* Exercise cards */}
