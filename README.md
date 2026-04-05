@@ -11,6 +11,7 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 
 | # | Date | What changed |
 |---|---|---|
+| 22 | 2026-04-06 | **Progress page revamp** — volume stats cards (total workouts, sets, tonnage, exercises); PR detection with "New PR!" celebration badges; progressive overload suggestions for next session; workout analysis with trend detection (up/down/stable); searchable exercise picker with muscle group filter chips; weight/volume/sets+reps chart tabs; friends' recent activity feed with privacy gating |
 | 21 | 2026-03-29 | **Add exercises mid-workout** — floating "+" FAB on active workout page opens `ExercisePickerModal` bottom sheet (search, muscle group filters, toggle selection); existing exercises greyed out with "In workout" badge; auto-renames workout from updated muscle groups; loads progressive overload hints for new exercises; auto-scrolls to first new card |
 | 20 | 2026-03-15 | **Smart suggested workouts** — `buildSmartSuggestion()` picks 2 most recovered muscles and 4 exercises each (prioritizing user's history); suggestion card on `/workout/new?mode=suggested` with Start Now (instant workout) and Customize (pre-selected picker); rest day message when all muscles are recovering |
 | 19 | 2026-03-15 | **Performance optimizations** — dashboard caching (`revalidate=60`) with `revalidatePath` on workout mutations; CSS PageTransition replacing framer-motion wrapper; dynamic import for Recharts (~70KB lazy-loaded); LazyMotion provider for framer-motion tree-shaking; layout auth switched from `getUser()` to `getSession()`; progress query capped at 200 rows |
@@ -63,12 +64,12 @@ A Fitbod-inspired workout tracking app for a small group of users. Track exercis
 - [x] **Revamp Suggested workouts** — smarter recovery-based suggestions with accept/customize flow
 
 ### Progress & Stats
-- [ ] Show workout volume stats (total sets, tonnage) in Progress
-- [ ] Add PR (personal record) detection and celebration
-- [ ] Add progressive overload suggestions based on last session
-- [ ] Basic workout analysis message based on the last few sessions
-- [ ] Replace default-looking dropdown in Progress with a styled selector/search
-- [ ] **Revamp Progress page** — richer charts, friends' workout details in Progress tab
+- [x] Show workout volume stats (total sets, tonnage) in Progress
+- [x] Add PR (personal record) detection and celebration
+- [x] Add progressive overload suggestions based on last session
+- [x] Basic workout analysis message based on the last few sessions
+- [x] Replace default-looking dropdown in Progress with a styled selector/search
+- [x] **Revamp Progress page** — richer charts, friends' workout details in Progress tab
 
 ### Exercise Library
 - [x] Add more exercises — expanded from 28 → 150 exercises across all muscle groups
