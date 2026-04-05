@@ -6,7 +6,8 @@ import { createClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { PageTransition } from '@/components/PageTransition'
-import { CheckCircle, Users, Eye, Target, Calendar } from 'lucide-react'
+import { CheckCircle, Users, Eye, Target, Calendar, Palette, Check } from 'lucide-react'
+import { ACCENT_PRESETS, getSavedAccent, saveAccent, applyAccent } from '@/lib/theme'
 
 function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void }) {
   return (
@@ -15,7 +16,7 @@ function Toggle({ checked, onChange }: { checked: boolean; onChange: () => void 
       aria-checked={checked}
       onClick={onChange}
       className={`relative h-7 w-12 rounded-full transition-colors duration-300 ${
-        checked ? 'bg-gradient-to-r from-[oklch(0.88_0.14_82)] to-[oklch(0.78_0.13_72)]' : 'bg-white/10'
+        checked ? 'bg-primary' : 'bg-white/10'
       }`}
     >
       <m.span
@@ -47,12 +48,17 @@ function Section({ icon: Icon, title, desc, children }: {
 }
 
 export default function SettingsPage() {
+  const [accentId, setAccentId] = useState('lime')
   const [workoutsPublic, setWorkoutsPublic] = useState(false)
   const [profileSearchable, setProfileSearchable] = useState(true)
   const [fitnessGoal, setFitnessGoal] = useState('hypertrophy')
   const [daysPerWeek, setDaysPerWeek] = useState(3)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    setAccentId(getSavedAccent())
+  }, [])
 
   useEffect(() => {
     async function load() {
@@ -88,6 +94,46 @@ export default function SettingsPage() {
           <p className="text-xs tracking-widest uppercase text-muted-foreground mb-1">Account</p>
           <h1 className="text-3xl font-bold text-gold">Profile</h1>
         </div>
+
+        <Section icon={Palette} title="Accent Color" desc="Pick your vibe">
+          <div className="grid grid-cols-4 gap-3">
+            {ACCENT_PRESETS.map(preset => {
+              const isActive = accentId === preset.id
+              return (
+                <button
+                  key={preset.id}
+                  onClick={() => {
+                    setAccentId(preset.id)
+                    saveAccent(preset.id)
+                    applyAccent(preset.id)
+                  }}
+                  className="flex flex-col items-center gap-2 group"
+                >
+                  <div
+                    className={`relative h-10 w-10 rounded-full transition-all ${
+                      isActive ? 'ring-2 ring-offset-2 ring-offset-[oklch(0.11_0_0)]' : 'hover:scale-110'
+                    }`}
+                    style={{
+                      background: preset.swatch,
+                      '--tw-ring-color': isActive ? preset.swatch : 'transparent',
+                    } as React.CSSProperties}
+                  >
+                    {isActive && (
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Check className="h-4.5 w-4.5 text-black" strokeWidth={3} />
+                      </div>
+                    )}
+                  </div>
+                  <span className={`text-[10px] font-medium ${
+                    isActive ? 'text-foreground' : 'text-muted-foreground'
+                  }`}>
+                    {preset.name}
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </Section>
 
         <Section icon={Eye} title="Privacy" desc="Control who sees your activity">
           <div className="space-y-4">

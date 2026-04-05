@@ -59,7 +59,7 @@ export function MuscleRecoveryBar({ recovery }: MuscleRecoveryBarProps) {
                 animate={{ width: `${pct}%` }}
                 transition={{ delay: i * 0.06 + 0.1, duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
                 className={`h-full rounded-full ${isReady
-                  ? 'bg-gradient-to-r from-[oklch(0.88_0.26_130)] to-[oklch(0.78_0.23_130)]'
+                  ? 'bg-primary'
                   : 'bg-gradient-to-r from-[oklch(0.35_0_0)] to-[oklch(0.28_0_0)]'
                 }`}
               />

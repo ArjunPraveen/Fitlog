@@ -76,6 +76,11 @@
 
   --lime: oklch(0.88 0.26 130);
   --lime-dim: oklch(0.75 0.22 130);
+
+  /* Accent gradient endpoints — overridden by ThemeProvider */
+  --accent-gradient-from: oklch(0.93 0.22 128);
+  --accent-gradient-to: oklch(0.82 0.28 133);
+  --primary-dim: oklch(0.75 0.22 130);
 }
 
 @layer base {
@@ -92,28 +97,29 @@
 }
 
 @layer utilities {
-  /* Lime gradient text — used for primary headings */
+  /* Accent gradient text — used for primary headings */
   .text-gold {
-    background: linear-gradient(135deg, oklch(0.93 0.22 128), oklch(0.82 0.28 133));
+    background: linear-gradient(135deg, var(--accent-gradient-from), var(--accent-gradient-to));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
-  /* Lime solid background */
+  /* Accent solid background */
   .bg-gold {
-    background: oklch(0.88 0.26 130);
+    background: var(--primary);
   }
 
-  /* Lime glow */
+  /* Accent glow */
   .glow-gold {
-    box-shadow: 0 0 20px oklch(0.88 0.26 130 / 30%), 0 0 60px oklch(0.88 0.26 130 / 10%);
+    box-shadow: 0 0 20px color-mix(in oklch, var(--primary) 30%, transparent),
+                0 0 60px color-mix(in oklch, var(--primary) 10%, transparent);
   }
 
-  /* Base card — dark with subtle lime top accent */
+  /* Base card — dark with subtle accent top border */
   .card-luxury {
     background: oklch(0.11 0 0);
-    border-top: 1px solid oklch(0.88 0.26 130 / 14%);
+    border-top: 1px solid color-mix(in oklch, var(--primary) 14%, transparent);
   }
 
   /* Display font utility */
@@ -141,6 +147,6 @@
 }
 
 @keyframes flame-pulse {
-  0%, 100% { box-shadow: 0 0 40px oklch(0.88 0.26 130 / 25%), 0 0 80px oklch(0.88 0.26 130 / 10%); }
-  50% { box-shadow: 0 0 50px oklch(0.88 0.26 130 / 35%), 0 0 100px oklch(0.88 0.26 130 / 15%); }
+  0%, 100% { box-shadow: 0 0 40px color-mix(in oklch, var(--primary) 25%, transparent), 0 0 80px color-mix(in oklch, var(--primary) 10%, transparent); }
+  50% { box-shadow: 0 0 50px color-mix(in oklch, var(--primary) 35%, transparent), 0 0 100px color-mix(in oklch, var(--primary) 15%, transparent); }
 }
